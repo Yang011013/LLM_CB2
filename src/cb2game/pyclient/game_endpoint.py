@@ -933,6 +933,13 @@ class GameEndpoint(object):
         if not self.render:
             return
         map_update, props, turn_state, instructions, actors, feedback = self._state()
+        if len(actors) == 1:
+            follower = actors[0]
+        else:
+            leader,follower = actors
+
+        map_update = CensorFollowerMap(map_update, follower, self.config)
+        props = CensorFollowerProps(props, follower, self.config)
         actor_states = [a.state() for a in actors]
         self.display.set_state_sync(
             state_sync.StateSync(

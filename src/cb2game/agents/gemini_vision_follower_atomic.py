@@ -148,10 +148,9 @@ class GeminiVisionFollowerAtomic(Agent):
         #     crop_non_white_square(f"follower_view/follower_visibility_{self.turn_number}_{action_number}.png"))
         # image_data = Path(crop_non_white_square(
         #     f"follower_view/follower_visibility_{self.turn_number}_{action_number}.png")).read_bytes()
-        image_data = Path(crop_non_white_square(
-            f"follower_view/follower_visibility_0_0.png")).read_bytes()
-        self.image_parts.append({"mime_type": "image/png",
-                    "data": image_data})
+        first_view_image_path = crop_non_white_square(f"follower_view/follower_visibility_0_0.png")
+        image_data = Path(first_view_image_path).read_bytes()
+        self.image_parts.append({"mime_type": "image/png", "data": image_data})
 
         if instrs[-1].text != self.current_instruction:
             print("=========================================================")
@@ -159,7 +158,7 @@ class GeminiVisionFollowerAtomic(Agent):
             print("=========================================================")
             p1 = f"""
             Here in the instruction you received from the leader: {instrs[-1].text}
-            the corresponding first-view RGB image: \n
+            the corresponding first-view png image: \n
             """
             p2 = f"Here is the structured string representing your first-view map: \n{description}"
             p3 = "Please provide your response:\n"
@@ -171,7 +170,7 @@ class GeminiVisionFollowerAtomic(Agent):
         else:
             p1 = f"""
             Here in the new instruction you received from the leader: {self.deferred_task}
-            the new corresponding first-view RGB image: \n
+            the new corresponding first-view png image: \n
             """
             p2 = f"Here is the new structured string representing your first-view map: \n{description}"
             p3 = "Please provide your response:\n"
