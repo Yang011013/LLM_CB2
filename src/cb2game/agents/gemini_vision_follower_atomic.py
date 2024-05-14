@@ -330,7 +330,7 @@ def deselect_card(mapu, description_atomic, follower, card_location):
     
 
 def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at heading  <angle> and distance <distance>: <TILE_TYPE>
-    if "Tile at heading 0 and distance 0.0" in keyword:
+    if "distance 0.0" in keyword:
         return ""
     lines = data.split('\n')
     matching_line = ""
