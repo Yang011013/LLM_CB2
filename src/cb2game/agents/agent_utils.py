@@ -1,5 +1,5 @@
 import functools
-
+import concurrent.futures
 from cb2game.pyclient.game_endpoint import Action, GameState
 import logging
 import time
@@ -163,7 +163,6 @@ def get_action_string(response_dict, mapu, prop_update, follower):
     if deferred_task == "NULL":
         action_string += ",done"
     return action_string
-
 
 def delay_execution(delay_time):
     def decorator(func):
