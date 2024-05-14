@@ -1,0 +1,97 @@
+Various resources that were useful in the creation of this project...
+
+- How to setup Unity to work with Git:
+
+https://thoughtbot.com/blog/how-to-git-with-unity
+
+- Websocket library that's compatible with webGL builds (used in this project):
+
+https://github.com/jsharf/NativeWebSocket
+
+- WebGL + Networking in Unity:
+
+https://docs.unity3d.com/Manual/webgl-networking.html
+
+- A good reference on hexagonal grids and game dev:
+
+https://www.redblobgames.com/grids/hexagons/
+
+- A good wikipedia article on an alternative Hex coordinate system:
+
+https://en.wikipedia.org/wiki/Hexagonal_Efficient_Coordinate_System
+
+- Setting up git hooks:
+
+https://githooks.com
+
+- Unity addressables (load assets asynchronously via the internet):
+
+https://docs.unity3d.com/Packages/com.unity.addressables@0.3/manual/AddressableAssetsDevelopmentCycle.html
+
+- Multiplayer & Networking Code (excellent resource):
+
+https://gafferongames.com
+
+- JSON Parson. I decided to use this version of JSON.NET ported to work with
+  Unity:
+
+https://github.com/jilleJr/Newtonsoft.Json-for-Unity/wiki/Installation-via-UPM
+
+Unity has built-in JSON parsing, but it's limited and doesn't support nested
+objects.
+
+- Decided to use an ORM for SQL so that I don't need to generate my own SQL
+  queries (seems brittle and like a security target). In particular being able
+to see the DB schema defined in the code as an object model is really nice.
+Here's a good performance benchmark of different python ORMs:
+
+https://github.com/tortoise/orm-benchmarks
+
+I chose Peewee because it's simple and the performance isn't too bad compared
+to others.
+
+- It seems that Unity's InputFields don't work well in WebGL. To fix it I added
+  this:
+
+https://github.com/kou-yeung/WebGLInput
+
+- Colorblind safe colors:
+
+https://personal.sron.nl/~pault/
+
+- Testing poor network conditions on osx:
+
+https://spin.atomicobject.com/2016/01/05/simulating-poor-network-connectivity-mac-osx/
+
+- Better WebGL HTML template:
+
+https://github.com/greggman/better-unity-webgl-template
+
+- For data browsing UIs, I wanted to do as little front-end HTML as possible so I used
+  w2ui:
+
+https://w2ui.com/web/get-started/legacy
+
+- For performance profiling and optimization, this tool has been instrumental:
+
+https://github.com/gaogaotiantian/viztracer
+
+For example, you can launch the server like this:
+
+```
+viztracer --tracer_entries=2000000 -m main --config_filepath="config/local-covers-config.json"
+```
+
+Keep in mind that traces are stored in a circular buffer and only the most
+recent ones will be kept -- old ones discarded. A lot of traces happen, so only
+the last few seconds of traces will be kept. This makes it tricky to capture the
+correct moment. --tracer_entries above lets you expand the circular buffer to
+capture a longer moment of time.
+
+- Google SSO docs:
+    https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+
+- Game Sound & Audio effects sourced from:
+
+https://github.com/akx/Notifications
+https://github.com/JimLynchCodes/Game-Sound-Effects

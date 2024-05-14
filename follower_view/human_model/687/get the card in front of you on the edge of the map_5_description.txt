@@ -1,0 +1,12 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 2 props. 
+PROP DESCRIPTIONS
+	Card at Path not in sight. distance: 2.6 units and heading: 79.10000000000002 degrees.
+	Card at Path not in sight. distance: 6.1 units and heading: 85.30000000000001 degrees.
+MAP DESCRIPTION
+	MEDIUM mountain at Path not in sight. distance: 4.4 units and heading: 96.60000000000002 degrees.
+NEARBY TILES
+	Right tile: heading 300 and distance 1.0 GROUND_TILE
+	Forward tile: heading 0 and distance 1.0 GROUND_TILE
+FURTHER TILES
+	

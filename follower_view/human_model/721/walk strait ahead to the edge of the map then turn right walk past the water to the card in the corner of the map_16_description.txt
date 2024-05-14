@@ -1,0 +1,13 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 1 props. 
+PROP DESCRIPTIONS
+	Card at Path to reach: forward, right, forward, left, forward.
+MAP DESCRIPTION
+	Lake of size 2 and shape REGULAR at Path not in sight. distance: 2.0 units and heading: 60.0 degrees.
+NEARBY TILES
+	Right tile: heading 300 and distance 1.0 WATER_TILE
+	Forward tile: heading 360 and distance 1.0 GROUND_TILE_PATH
+FURTHER TILES
+	Tile at heading 330 and distance 1.7: GROUND_TILE_PATH
+	Tile at heading 319 and distance 2.6: GROUND_TILE_PATH
+	Tile at heading 341 and distance 2.6: GROUND_TILE_PATH

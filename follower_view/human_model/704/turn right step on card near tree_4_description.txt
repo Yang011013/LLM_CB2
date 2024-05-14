@@ -1,0 +1,11 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 2 props. 
+PROP DESCRIPTIONS
+	Card at Path to reach: right, forward.
+	Card at Path not in sight. distance: 6.2 units and heading: 103.89999999999998 degrees.
+MAP DESCRIPTION
+	Lake of size 2 and shape ISLAND at Path not in sight. distance: 1.7 units and heading: 90.0 degrees.
+NEARBY TILES
+	Right tile: heading 300 and distance 1.0 GROUND_TILE
+FURTHER TILES
+	Tile at heading 330 and distance 1.7: GROUND_TILE_PATH

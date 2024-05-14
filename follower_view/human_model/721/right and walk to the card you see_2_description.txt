@@ -1,0 +1,11 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 2 props. 
+PROP DESCRIPTIONS
+	Card at You are standing here..
+	Card at Path not in sight. distance: 4.4 units and heading: 96.6 degrees.
+MAP DESCRIPTION
+	
+NEARBY TILES
+	
+FURTHER TILES
+	

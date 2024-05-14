@@ -1,0 +1,11 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 2 props. 
+PROP DESCRIPTIONS
+	Card at Path not in sight. distance: 3.6 units and heading: 73.9 degrees.
+	Card at Path not in sight. distance: 3.0 units and heading: 60.0 degrees.
+MAP DESCRIPTION
+	
+NEARBY TILES
+	Right tile: heading -60 and distance 1.0 GROUND_TILE_PATH
+FURTHER TILES
+	

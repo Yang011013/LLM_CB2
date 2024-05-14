@@ -1,0 +1,198 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 0 props. 
+PROP DESCRIPTIONS
+	
+NEARBY TILES
+	Left tile: heading 60 and distance 1.0 GROUND_TILE_PATH
+		HecsCoord(a=0, r=8, c=8)
+		Path to reach: right, forward
+	Right tile: heading 300 and distance 1.0 GROUND_TILE
+		HecsCoord(a=1, r=7, c=9)
+		Path to reach: forward
+	Forward tile: heading 360 and distance 1.0 GROUND_TILE_HOUSE_RED
+		HecsCoord(a=1, r=7, c=8)
+		Path to reach: left, forward
+FURTHER TILES
+	Tile at heading 330 and distance 1.7: GROUND_TILE_HOUSE_PINK
+		HecsCoord(a=0, r=7, c=9)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, right, forward, forward, right, forward
+        To right: cannot reach
+        To down right: right, forward
+        To down left: cannot reach
+        To left: left, forward, right, forward, right, forward
+        To up left: left, forward, right, forward, right, forward, forward
+	Tile at heading 390 and distance 1.7: GROUND_TILE_PATH
+		HecsCoord(a=1, r=7, c=7)
+		Path to reach: left, forward, right, forward
+	Tile at heading 360 and distance 2.0: GROUND_TILE_PATH
+		HecsCoord(a=0, r=7, c=8)
+		Path to reach: left, forward, right, forward, right, forward
+	Tile at heading 319 and distance 2.6: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=9)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward
+	Tile at heading 341 and distance 2.6: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=8)
+		Path to reach: left, forward, right, forward, right, forward, forward
+	Tile at heading 401 and distance 2.6: GROUND_TILE_HOUSE_BLUE
+		HecsCoord(a=1, r=7, c=6)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, forward
+        To right: left, forward, right, forward
+        To down right: cannot reach
+        To down left: cannot reach
+        To left: left, forward, right, forward, forward, forward, left, forward, left, forward, left, forward
+        To up left: cannot reach
+	Tile at heading 379 and distance 2.6: GROUND_TILE_PATH
+		HecsCoord(a=0, r=7, c=7)
+		Path to reach: left, forward, right, forward, forward
+	Tile at heading 360 and distance 3.0: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=7)
+		Path to reach: left, forward, right, forward, right, forward, left, forward
+	Tile at heading 314 and distance 3.6: GROUND_TILE
+		HecsCoord(a=0, r=6, c=10)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward, left, forward
+	Tile at heading 330 and distance 3.5: GROUND_TILE_HOUSE_ORANGE
+		HecsCoord(a=0, r=6, c=9)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward
+        To right: left, forward, right, forward, right, forward, forward, right, forward, left, forward
+        To down right: left, forward, right, forward, right, forward, forward, right, forward
+        To down left: left, forward, right, forward, right, forward, forward
+        To left: left, forward, right, forward, right, forward, forward, left, forward
+        To up left: cannot reach
+	Tile at heading 346 and distance 3.6: GROUND_TILE_PATH
+		HecsCoord(a=0, r=6, c=8)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward
+	Tile at heading 406 and distance 3.6: GROUND_TILE
+		HecsCoord(a=1, r=7, c=5)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, left, forward, left, forward
+	Tile at heading 390 and distance 3.5: GROUND_TILE_HOUSE
+		HecsCoord(a=0, r=7, c=6)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, forward, forward
+        To right: left, forward, right, forward, forward
+        To down right: cannot reach
+        To down left: left, forward, right, forward, forward, forward, left, forward, left, forward, left, forward
+        To left: left, forward, right, forward, forward, forward, left, forward, left, forward
+        To up left: left, forward, right, forward, forward, forward, left, forward
+	Tile at heading 374 and distance 3.6: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=6)
+		Path to reach: left, forward, right, forward, forward, forward
+	Tile at heading 360 and distance 4.0: GROUND_TILE_PATH
+		HecsCoord(a=0, r=6, c=7)
+		Path to reach: left, forward, right, forward, right, forward, left, forward, forward
+	Tile at heading 323 and distance 4.4: GROUND_TILE
+		HecsCoord(a=1, r=5, c=9)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward
+	Tile at heading 337 and distance 4.4: GROUND_TILE_HOUSE_ORANGE
+		HecsCoord(a=1, r=5, c=8)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, forward
+        To right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward
+        To down right: cannot reach
+        To down left: left, forward, right, forward, right, forward, forward, left, forward
+        To left: left, forward, right, forward, right, forward, forward, left, forward, forward
+        To up left: left, forward, right, forward, right, forward, forward, left, forward, forward, right, forward
+	Tile at heading 349 and distance 4.6: GROUND_TILE_PATH
+		HecsCoord(a=1, r=5, c=7)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward, forward
+	Tile at heading 397 and distance 4.4: GROUND_TILE
+		HecsCoord(a=0, r=7, c=5)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, left, forward
+	Tile at heading 383 and distance 4.4: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=5)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward
+	Tile at heading 371 and distance 4.6: GROUND_TILE_HOUSE_GREEN
+		HecsCoord(a=0, r=6, c=6)
+		<cannot reach>. 
+        To up right: cannot reach
+        To right: left, forward, right, forward, right, forward, left, forward, forward
+        To down right: left, forward, right, forward, forward, forward
+        To down left: left, forward, right, forward, forward, forward, left, forward
+        To left: left, forward, right, forward, forward, forward, left, forward, right, forward
+        To up left: left, forward, right, forward, forward, forward, left, forward, right, forward, right, forward
+	Tile at heading 360 and distance 5.0: GROUND_TILE_HOUSE_TRIPLE_RED
+		HecsCoord(a=1, r=5, c=6)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, right, forward, forward, left, forward, forward, forward
+        To right: left, forward, right, forward, right, forward, forward, left, forward, forward
+        To down right: left, forward, right, forward, right, forward, left, forward, forward
+        To down left: cannot reach
+        To left: left, forward, right, forward, forward, forward, left, forward, right, forward, right, forward
+        To up left: left, forward, right, forward, right, forward, forward, left, forward, forward, forward, left, forward
+	Tile at heading 319 and distance 5.3: GROUND_TILE
+		HecsCoord(a=0, r=5, c=10)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, right, forward
+	Tile at heading 330 and distance 5.2: GROUND_TILE
+		HecsCoord(a=0, r=5, c=9)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, forward
+	Tile at heading 341 and distance 5.3: GROUND_TILE_PATH
+		HecsCoord(a=0, r=5, c=8)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward, forward, right, forward
+	Tile at heading 351 and distance 5.6: GROUND_TILE
+		HecsCoord(a=0, r=5, c=7)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward, forward, forward
+	Tile at heading 401 and distance 5.3: GROUND_TILE
+		HecsCoord(a=0, r=7, c=4)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, left, forward, right, forward
+	Tile at heading 390 and distance 5.2: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=4)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, forward
+	Tile at heading 379 and distance 5.3: GROUND_TILE
+		HecsCoord(a=0, r=6, c=5)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, right, forward
+	Tile at heading 369 and distance 5.6: GROUND_TILE
+		HecsCoord(a=1, r=5, c=5)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, right, forward, right, forward
+	Tile at heading 360 and distance 6.0: GROUND_TILE
+		HecsCoord(a=0, r=5, c=6)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward, forward, forward, left, forward
+	Tile at heading 316 and distance 6.2: GROUND_TILE_PATH
+		HecsCoord(a=1, r=4, c=10)
+		Path to reach: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, right, forward, forward
+	Tile at heading 325 and distance 6.1: GROUND_TILE_STONES_GREENBUSH
+		HecsCoord(a=1, r=4, c=9)
+		<cannot reach>. 
+        To up right: cannot reach
+        To right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, right, forward, forward
+        To down right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, right, forward
+        To down left: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, forward
+        To left: cannot reach
+        To up left: cannot reach
+	Tile at heading 335 and distance 6.1: GROUND_TILE_HOUSE_ORANGE
+		HecsCoord(a=1, r=4, c=8)
+		<cannot reach>. 
+        To up right: cannot reach
+        To right: cannot reach
+        To down right: left, forward, right, forward, right, forward, forward, right, forward, left, forward, left, forward, forward
+        To down left: left, forward, right, forward, right, forward, forward, left, forward, forward, right, forward
+        To left: left, forward, right, forward, right, forward, forward, left, forward, forward, right, forward, left, forward
+        To up left: cannot reach
+	Tile at heading 344 and distance 6.2: GROUND_TILE_PATH
+		HecsCoord(a=1, r=4, c=7)
+		Path to reach: left, forward, right, forward, right, forward, forward, left, forward, forward, right, forward, left, forward
+	Tile at heading 404 and distance 6.2: GROUND_TILE_HOUSE_BLUE
+		HecsCoord(a=0, r=7, c=3)
+		<cannot reach>. 
+        To up right: left, forward, right, forward, forward, forward, left, forward, forward, forward
+        To right: left, forward, right, forward, forward, forward, left, forward, left, forward, right, forward
+        To down right: cannot reach
+        To down left: cannot reach
+        To left: cannot reach
+        To up left: cannot reach
+	Tile at heading 395 and distance 6.1: GROUND_TILE_PATH
+		HecsCoord(a=1, r=6, c=3)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, forward, forward
+	Tile at heading 385 and distance 6.1: GROUND_TILE
+		HecsCoord(a=0, r=6, c=4)
+		Path to reach: left, forward, right, forward, forward, forward, left, forward, forward, right, forward
+	Tile at heading 376 and distance 6.2: GROUND_TILE_STREETLIGHT
+		HecsCoord(a=1, r=5, c=4)
+		<cannot reach>. 
+        To up right: cannot reach
+        To right: left, forward, right, forward, forward, forward, left, forward, right, forward, right, forward
+        To down right: left, forward, right, forward, forward, forward, left, forward, right, forward
+        To down left: left, forward, right, forward, forward, forward, left, forward, forward, right, forward
+        To left: cannot reach
+        To up left: cannot reach

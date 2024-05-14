@@ -1,0 +1,131 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - HexGrid
+  - NetworkManager
+  - Card
+  - EntityManager
+  - Outline
+  - Stats
+  - TAB_MENU
+  - ESCAPE_MENU
+  - ConnectionStatus
+  - MessageInputField
+  - ChatLog
+  - ScrollView
+  - InGameMenuHandler
+  - GAME_OVER_UI
+  - GAME_OVER_STATS
+  - SCORE_TEXT
+  - OUR_TURN_INDICATOR
+  - NOT_OUR_TURN_INDICATOR
+  - GAME_OVER_REASON
+  - OBJECTIVES
+  - OBJECTIVE_LIST
+  - OverheadViewCam
+  - END_TURN_PANEL
+  - AngledViewCam
+  - LEADER_COMMANDS
+  - TutorialManager
+  - HIGHLIGHT_BOX
+  - TUTORIAL_TOOLTIP
+  - TOOLTIP_CANVAS
+  - INSTRUCTIONS
+  - SCORE
+  - FOLLOWER_COMMANDS
+  - THUMBS_UP_SIGNAL
+  - THUMBS_DOWN_SIGNAL
+  - FEEDBACK_WINDOW
+  - USERNAME_DISPLAY
+  - AUDIO_LISTENER
+  - TURN_START_SOUND
+  - MUTE_AUDIO_TOGGLE
+  - REPLAY_GAME_TIME
+  - REPLAY_TURN
+  - REPLAY_SCORE
+  - REPLAY_PREV
+  - REPLAY_PAUSE
+  - REPLAY_NEXT
+  - ESCAPE_MENU_REPLAY_INFO
+  - LEADER_TURN_INDICATOR
+  - FOLLOWER_TURN_INDICATOR
+  - CANCEL_LOADING_RING
+  - CANCEL_BUTTON
+  - CAMERA_BUTTON
+  - SEND_BUTTON
+  - FOLLOWER_VIEW
+  - PLAYPAUSE
+  - ReplayManager
+  - LEADER_SCORE_TEXT
+  - FOLLOWER_SCORE_TEXT
+  - INSTRUCTION_TITLE_TEXT
+  - QUEUE_TIMEOUT_UI
+  - CANCEL_QUEUE_BTN
+  - LEADER_FEEDBACK_WINDOW
+  - LOGIN_STATUS_TEXT
+  - LOGIN_STATUS_PANEL
+  - GoogleOneTapLogin
+  - GOOGLE_LOGOUT
+  - PROGRESS_BAR
+  - TEST_URL_PARAMS
+  - POSITIVE_FEEDBACK
+  - NEGATIVE_FEEDBACK
+  - UploadScenarioState
+  - DisplayCoordinates
+  - DYNAMIC_BUTTONS
+  - BULLETIN_TEXT
+  - MAIN_MENU
+  - WAIT_QUEUE_MENU
+  - INSTRUCTION_RECEIVED_SOUND
+  - INSTRUCTION_SENT_SOUND
+  - INVALID_SET_SOUND
+  - NEGATIVE_FEEDBACK_SOUND
+  - POSITIVE_FEEDBACK_SOUND
+  - VALID_SET_SOUND
+  - CARD_SELECT
+  - CARD_DESELECT
+  - EASTER_EGG_SOUND_1
+  - EASTER_EGG_SOUND_2
+  - EASTER_EGG_SOUND_3
+  - EASTER_EGG_SOUND_4
+  - SCREEN_TINT
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - PostProcessing
+  - Water
+  - UI
+  - Outline
+  - All
+  - PlayerIndicator
+  - card_covers
+  - follower_outlines
+  - leader_outlines
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0

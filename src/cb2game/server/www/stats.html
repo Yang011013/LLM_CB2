@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="https://w2ui.com/src/w2ui-1.5.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://w2ui.com/src/w2ui-1.5.min.js"></script>
+</head>
+<body>
+  <h2 id="title"></h2>
+  <div id="grid" style="width: 100%; height: 500px;"></div>
+</body>
+<script>
+$(function () {
+    // Look for a password parameter in the URL and forward it in postData below.
+    var mturkParameters = new URLSearchParams(window.location.search);
+    var postData = {};
+    if (mturkParameters.has('from_game_id'))
+    {
+      console.log("from_game_id: " + mturkParameters.get('from_game_id'));
+      postData['from_game_id'] = mturkParameters.get('from_game_id');
+    }
+
+    if (mturkParameters.has('to_game_id'))
+    {
+      console.log("to_game_id: " + mturkParameters.get('to_game_id'));
+      postData['to_game_id'] = mturkParameters.get('to_game_id');
+    }
+
+    $('#grid').w2grid({
+        name: 'grid',
+        header: 'List of Games',
+        columns: [
+          { field: 'name', text: '', size: '20%' },
+          { field: 'mean', text: 'Mean', size: '20%' },
+          { field: 'median', text: 'Median', size: '20%' },
+          { field: 'max', text: 'Max', size: '20%' },
+          { field: 'count', text: 'Count', size: '20%' },
+        ],
+        url: "/data/stats",
+        postData: postData,
+    });
+
+    // use $.get() to grab the server configuration ('/data/config'). Set the "title" element to the configuration's name.
+    $.get("/data/config", function(data) {
+        $("#title").text(data.name);
+    });
+});
+</script>
+</html>

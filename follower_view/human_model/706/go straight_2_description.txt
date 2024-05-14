@@ -1,0 +1,48 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 1 props. 
+PROP DESCRIPTIONS
+	Card at Path to reach: right, forward, left, forward, right, forward, left, forward, forward, forward, forward.
+MAP DESCRIPTION
+	City of size 2 at Path not in sight. distance: 5.0 units and heading: 60.0 degrees.
+NEARBY TILES
+	Left tile: heading 60 and distance 1.0 GROUND_TILE
+	Right tile: heading 300 and distance 1.0 GROUND_TILE
+	Forward tile: heading 360 and distance 1.0 GROUND_TILE
+FURTHER TILES
+	Tile at heading 330 and distance 1.7: GROUND_TILE
+	Tile at heading 390 and distance 1.7: GROUND_TILE
+	Tile at heading 360 and distance 2.0: GROUND_TILE
+	Tile at heading 319 and distance 2.6: GROUND_TILE
+	Tile at heading 341 and distance 2.6: GROUND_TILE
+	Tile at heading 401 and distance 2.6: GROUND_TILE_HOUSE_BLUE
+	Tile at heading 379 and distance 2.6: GROUND_TILE_STONES_GREENBUSH
+	Tile at heading 360 and distance 3.0: GROUND_TILE
+	Tile at heading 314 and distance 3.6: GROUND_TILE_HOUSE_BLUE
+	Tile at heading 330 and distance 3.5: GROUND_TILE
+	Tile at heading 346 and distance 3.6: GROUND_TILE
+	Tile at heading 406 and distance 3.6: GROUND_TILE_PATH
+	Tile at heading 390 and distance 3.5: GROUND_TILE
+	Tile at heading 374 and distance 3.6: GROUND_TILE_ROCKY
+	Tile at heading 360 and distance 4.0: GROUND_TILE
+	Tile at heading 323 and distance 4.4: GROUND_TILE_PATH
+	Tile at heading 337 and distance 4.4: GROUND_TILE_PATH
+	Tile at heading 349 and distance 4.6: RAMP_TO_MOUNTAIN
+	Tile at heading 397 and distance 4.4: GROUND_TILE
+	Tile at heading 383 and distance 4.4: GROUND_TILE_STONES_GREENBUSH
+	Tile at heading 371 and distance 4.6: MOUNTAIN_TILE_TREE
+	Tile at heading 360 and distance 5.0: MOUNTAIN_TILE
+	Tile at heading 319 and distance 5.3: GROUND_TILE_HOUSE_PINK
+	Tile at heading 330 and distance 5.2: GROUND_TILE
+	Tile at heading 341 and distance 5.3: GROUND_TILE_PATH
+	Tile at heading 351 and distance 5.6: GROUND_TILE_PATH
+	Tile at heading 401 and distance 5.3: GROUND_TILE
+	Tile at heading 390 and distance 5.2: GROUND_TILE
+	Tile at heading 379 and distance 5.3: MOUNTAIN_TILE_TREE
+	Tile at heading 369 and distance 5.6: MOUNTAIN_TILE
+	Tile at heading 360 and distance 6.0: MOUNTAIN_TILE_TREE
+	Tile at heading 316 and distance 6.2: GROUND_TILE_HOUSE_BLUE
+	Tile at heading 325 and distance 6.1: GROUND_TILE_STREETLIGHT
+	Tile at heading 335 and distance 6.1: GROUND_TILE
+	Tile at heading 344 and distance 6.2: GROUND_TILE
+	Tile at heading 385 and distance 6.1: GROUND_TILE_TREES_2
+	Tile at heading 376 and distance 6.2: MOUNTAIN_TILE

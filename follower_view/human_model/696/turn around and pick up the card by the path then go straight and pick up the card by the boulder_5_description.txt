@@ -1,0 +1,47 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 1 props. 
+PROP DESCRIPTIONS
+	Card at Path to reach: left, forward.
+MAP DESCRIPTION
+	
+NEARBY TILES
+	Left tile: heading 60 and distance 1.0 GROUND_TILE
+	Right tile: heading -60 and distance 1.0 GROUND_TILE
+	Forward tile: heading 0 and distance 1.0 GROUND_TILE
+FURTHER TILES
+	Tile at heading 30 and distance 1.7: GROUND_TILE
+	Tile at heading 0 and distance 2.0: GROUND_TILE
+	Tile at heading -30 and distance 1.7: GROUND_TILE
+	Tile at heading 41 and distance 2.6: GROUND_TILE
+	Tile at heading 19 and distance 2.6: GROUND_TILE
+	Tile at heading 0 and distance 3.0: GROUND_TILE
+	Tile at heading -19 and distance 2.6: GROUND_TILE
+	Tile at heading -41 and distance 2.6: GROUND_TILE
+	Tile at heading 46 and distance 3.6: GROUND_TILE
+	Tile at heading 30 and distance 3.5: GROUND_TILE
+	Tile at heading 14 and distance 3.6: GROUND_TILE
+	Tile at heading 0 and distance 4.0: GROUND_TILE_STONES_GREYBUSH
+	Tile at heading -14 and distance 3.6: GROUND_TILE
+	Tile at heading -30 and distance 3.5: GROUND_TILE
+	Tile at heading -46 and distance 3.6: GROUND_TILE
+	Tile at heading 37 and distance 4.4: GROUND_TILE
+	Tile at heading 23 and distance 4.4: GROUND_TILE
+	Tile at heading 11 and distance 4.6: GROUND_TILE_HOUSE_RED
+	Tile at heading 0 and distance 5.0: GROUND_TILE_PATH
+	Tile at heading -11 and distance 4.6: GROUND_TILE
+	Tile at heading -23 and distance 4.4: GROUND_TILE
+	Tile at heading -37 and distance 4.4: GROUND_TILE
+	Tile at heading 41 and distance 5.3: GROUND_TILE_PATH
+	Tile at heading 30 and distance 5.2: GROUND_TILE_PATH
+	Tile at heading 19 and distance 5.3: GROUND_TILE_PATH
+	Tile at heading 9 and distance 5.6: GROUND_TILE_PATH
+	Tile at heading 0 and distance 6.0: GROUND_TILE_STREETLIGHT
+	Tile at heading -9 and distance 5.6: GROUND_TILE
+	Tile at heading -19 and distance 5.3: GROUND_TILE
+	Tile at heading -30 and distance 5.2: GROUND_TILE
+	Tile at heading 44 and distance 6.2: GROUND_TILE
+	Tile at heading 35 and distance 6.1: GROUND_TILE
+	Tile at heading 25 and distance 6.1: GROUND_TILE
+	Tile at heading 16 and distance 6.2: GROUND_TILE_PATH
+	Tile at heading -16 and distance 6.2: GROUND_TILE
+	Tile at heading -25 and distance 6.1: GROUND_TILE

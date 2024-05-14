@@ -1,0 +1,21 @@
+# Copy this file to generate a GPTFollower agent.
+# See GPTFollowerConfig in agents/gpt_follower.py for more details.
+#
+# If you're afraid of YAML, realize that YAML is a superset of JSON, so you can
+# just replace this file with an equivalent JSON file if you want.
+#
+# Some OpenAI models you can try:
+# model="gpt-4"
+# model="gpt-3.5-turbo"
+name: "Gemini-Vision Follower"
+comment: "An agent which describes the game map using text and the image of view, and then asks Gemini what to do."
+agent_type: "GEMINI_VISION_FOLLOWER" # agent_type
+config: # gpt_follower_config
+    temperature: 0.4
+    top_p: 1
+    top_k: 32
+    max_output_tokens: 2048
+    max_in_tokens: 30000
+    model: "gemini-1.0-pro-vision-latest" # "gemini-1.0-pro-latest"
+    gemini_api_key: ""
+    queueing_enabled: False #True-->list of actions, False-->single action

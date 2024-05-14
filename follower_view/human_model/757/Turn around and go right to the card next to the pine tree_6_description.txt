@@ -1,0 +1,12 @@
+MAP DIMENSIONS:
+	25x25 hexagon map with 0 props. 
+PROP DESCRIPTIONS
+	
+MAP DESCRIPTION
+	
+NEARBY TILES
+	Left tile: heading 60 and distance 1.0 GROUND_TILE
+	Right tile: heading -60 and distance 1.0 GROUND_TILE
+	Forward tile: heading -0 and distance 1.0 GROUND_TILE_TREE_DARKGREEN
+FURTHER TILES
+	

@@ -1,0 +1,45 @@
+<html>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cerealbar2 Changelist</title>
+    <xmp theme="united" style="display:none;">
+
+## July 25th, 2022
+* Players have less time per turn to move:
+    - Leader turn time: 60s -> 50s (new)
+    - Follower turn time: 45s -> 15s (!!) (new)
+    - This was done because games were taking significantly longer than expected. This lowered effective pay for players to unacceptable levels.
+
+## July 8th, 2022
+* New follower-only mturk task & queueing system.
+* This paves the way for our new follower-only qual, to streamline the training of mturk workers.
+
+## July 5th, 2022
+* New, improved UI taking player feedback into account.
+* Followers can no longer see card patterns (unless a card is selected). From the follower's POV, all card outlines are blue.
+* The leader now has interrupt capabilities: Hold the interrupt button to take over the follower's turn.
+* Improved maps with new assets (trees, houses, and lake formations. snowy mountains).
+* Improved server performance (all noticeable lag should be gone!)
+
+## March 29th, 2022
+* Added Audio queues on game start and when its the player's turn.
+* Fixes bug which allowed leaders to send a message when it wasn't their turn.
+
+## March 28th, 2022
+* Improved server performance, reducing latency.
+* Changes to incentivize higher game quality:
+    - Created experienced pool of players. Hopefully this results in higher scores + more payouts.
+    - Reduced base payout of game to $0.15 (was $0.30).
+
+## March 21st, 2022
+* Added leaderboard (beta) and each worker is assigned a username.
+* Workers can request to change their username.
+* Fixed link on mturk task page, can now right-click and "open in new tab".
+
+## March 12th, 2022
+* Followers can no longer see red card borders.
+* Improved card colors (pink and red less ambiguous)
+* Live feedback is now more visible.
+    </xmp>
+    <script src="/js/strapdown.min.js"></script>
+</html>
