@@ -200,6 +200,7 @@ class GeminiVisionFollowerAtomic(Agent):
         immediate_task = response_dict["Immediate Task"]
         # try: # 可能输出不规范
         #     response_dict = json.loads(response_text)
+        #     response_dict = json.loads(response_text)
         #     self.deferred_task = response_dict["Deferred Task"]
         #     immediate_task = response_dict["Immediate Task"]
         # except KeyError as e:
@@ -277,14 +278,14 @@ def call_gemini_api_sync(messages, model):
 
 def deselect_card(mapu, description_atomic, follower, card_location):
     # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
-    if card_location == "Tile at heading 0 and distance 0: CARD": # card_location == follower.location()(HecsCoord)
+    if "distance 0:" in card_location:
         # 还要考虑follower的朝向
         follower_orientation = follower.heading_degrees() - 60
         atomic_instructions = []
         # 检查周围的tile是否可行
         # 可行的tile.name: "GROUND_TILE":3, "GROUND_TILE_PATH":28,"MOUNTAIN_TILE":30,"RAMP_TO_MOUNTAIN":31,"SNOWY_MOUNTAIN_TILE":32,"SNOWY_RAMP_TO_MOUNTAIN":36
         actionable_tiles_id = [3, 28, 30, 31, 32, 36]
-        for neighbors_location in  follower.location().neighbors():
+        for neighbors_location in follower.location().neighbors():
             # 检索该tile的名字，并判断是否在可行的tile中
             neighbors_tile_id = mapu.get_tile_id(neighbors_location)
             if neighbors_tile_id not in actionable_tiles_id:
@@ -330,12 +331,14 @@ def deselect_card(mapu, description_atomic, follower, card_location):
 
 def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at heading  <angle> and distance <distance>: <TILE_TYPE>
     if "Tile at heading 0 and distance 0.0" in keyword:
-        return " "
+        return ""
     lines = data.split('\n')
     matching_line = ""
     found = False
     for i, line in enumerate(lines):
         if keyword.lower() in line.lower():
+            if "You are standing here." in lines[i+2]:
+                return ""
             for j in range(i+2, i+9):
                 if j < len(lines) and "cannot reach" not in lines[j]:
                     matching_line = lines[j].split(":")[1]

@@ -442,9 +442,9 @@ def DescribeMap(
         header
         + "CARDS DESCRIPTIONS\n\t"
         + "SELECTED CARDS:\n\t"
-        + "\n\t".join(selected_card_descriptions)
-        + "\nUNSELECTED CARDS:\n\t"
-        + "\n\t".join(unselected_card_descriptions)
+        + "\n\t\t".join(selected_card_descriptions)
+        + "\n\tUNSELECTED CARDS:\n\t"
+        + "\n\t\t".join(unselected_card_descriptions)
         + "\nMAP DESCRIPTION\n\t"
         + "\n\t".join(metadata_descriptions)
         + "\nNEARBY TILES\n\t"
