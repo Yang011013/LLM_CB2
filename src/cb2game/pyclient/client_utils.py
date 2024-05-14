@@ -204,7 +204,9 @@ def SystemPrompt() -> str:
     Due to limited visibility, your perspective is restricted to a fan-shaped area directly in front of you. \n
     The environment's first-person view can be represented by a structured string with the following components:
     - MAP DIMENSIONS: A {map.rows}x{map.cols} hexagon map with {num_cards_in_view} cards in follower's view.
-    - CARDS DESCRIPTIONS: A list of tiles with type of CARD, formatted "Tile at heading {direction:.0f}° and distance {distance:.1f}: CARD"
+    - CARDS DESCRIPTIONS: A list of tiles with type of CARD
+        - SELECTED CARDS: A list of selected cards, formatted "Tile at heading {direction:.0f}° and distance {distance:.1f}: CARD. Shape {shape.name}, color {color.name}, count {count}"
+        - UNSELECTED CARDS: A list of unselected cards, formatted "Tile at heading {direction:.0f}° and distance {distance:.1f}: CARD"
     - MAP DESCRIPTION: Descriptions of the lake, mountain, city, and leader visible within the view.
     - NEARBY TILES:
         - Left Tile: At a heading of 60 and a distance of 1.0, named {AssetId(tile.asset_id).name}
@@ -213,7 +215,7 @@ def SystemPrompt() -> str:
         (Note: The tile behind you is not visible.)
     - FURTHER TILES: A list of distant tiles, formatted as "Tile at heading {direction:.0f}° and distance {distance:.1f}: {AssetId(tile.asset_id).name}"
     
-    A direction greater than 0 means the tile is to your left, less than 0 means the tile is to your right, and equal to 0 means the tile is directly in front of you.
+    A direction of heading greater than 0 means the tile is to your left, less than 0 means the tile is to your right, and equal to 0 means the tile is directly in front of you.
     
     
     # PNG Image of your first-view map: \n
@@ -274,26 +276,32 @@ def SystemPrompt() -> str:
     
     # Example:
     Here are some examples, It should be noted that the Loactions in the example come from the structured first-view string provided each time and is not made up at will. \n:
-    instruction from the leader: “Move to the tree and pick up the card.” \n
+    instruction from the leader: "Move to the tree and pick up the card." \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 4.0: GROUND_TILE", "Deferred Task": "Pick up the card near the tree."} \n
 
-    instruction from the leader: “Get the card that you can see across from you right now; it will be on the right side of the lake”
+    instruction from the leader: "Get the card that you can see across from you right now; it will be on the right side of the lake"
     Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 4.0: CARD", "Deferred Task": "NULL"} \n
 
-    instruction from the leader: “Turn 180 degrees and get the card immediately in front of you” \n
+    instruction from the leader: "Turn 180 degrees and get the card immediately in front of you" \n
     Output: {"Immediate Task": "Change Direction: Turn Around", "Deferred Task": "Get the card in front of you."} \n
 
-    instruction from the leader: “unselect the card you are on” \n
+    instruction from the leader: "unselect the card you are on" \n
     Output: {"Immediate Task": "Card Interaction: Deselect Card at Tile at heading 0 and distance 0: CARD", "Deferred Task": "NULL"} \n
 
-    instruction from the leader: “turn left and grab that card” \n
-    Output: {"Immediate Task": "Change Direction: Turn Left", "Deferred Task": "Grab the card nearest to you."} \n
+    instruction from the leader: "turn left twice and grab that card" \n
+    Output: {"Immediate Task": "Change Direction: Turn Left", "Deferred Task": "Turn left again then grab the card nearest to you."} \n
 
-    instruction from the leader: “get the card by the dark green tree” \n
+    instruction from the leader: "get the card by the dark green tree" \n
     Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading 14 and distance 3.6: CARD", "Deferred Task": "NULL"} \n
 
-    instruction from the leader: “take five steps forward then turn around” \n
+    instruction from the leader: "take five steps forward then turn around" \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 5.0: GROUND_TILE_PATH", "Deferred Task": "turn around"} \n
+    
+    instruction from the leader: "select the card on distant right of you" \n
+    Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 5.0: CARD", "Deferred Task": "NULL"} \n
+    
+    instruction from the leader: "waite" \n
+    Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 0: GROUND_TILE", "Deferred Task": "NULL"} \n
     """
     return system_prompt
 
@@ -316,37 +324,11 @@ def DescribeMap(
         default_config = Config()
         fog_end = default_config.fog_end
 
-    instruction_descriptions = []
-    for i, instruction in enumerate(instructions):
-        # Determine instruction status from instruction.completed, instruction.cancelled (if neither, then in progress).
-        if instruction.completed:
-            status = "completed"
-        elif instruction.cancelled:
-            status = "cancelled"
-        else:
-            status = "ACTIVE"
-        instruction_descriptions.append(
-            f"Status: {status}, Instruction: {instruction.text}"
-        )
-        # There can only be one active instruction at a time. Any instructions after this are queued for future reveal. End iteration.
-        if status == "ACTIVE":
-            break
-
-    # Print each instruction description on a line, indented:
-    instruction_section = "INSTRUCTIONS\n"
-    for instruction in instruction_descriptions:
-        instruction_section += f"\t{instruction}\n"
-
-    # Describe the turn state
-    turn_state_description = f"Moves remaining: {turn_state.moves_remaining}.\n\tWho's turn it is: {turn_state.turn}.\n\tTurns left before end of game: {turn_state.turns_left}.\n\tCurrent Score: {turn_state.score}.\n\tGame Over:{turn_state.game_over}\n"
-
-    # Describe the props
-    prop_descriptions = []
+    # Describe the cards
+    selected_card_descriptions = []
+    unselected_card_descriptions = []
     for prop in prop_update.props:
         if prop.prop_type == PropType.CARD:
-            # location_description = DescribeLocationFromActor(
-            #     prop.prop_info.location, follower, map_update, cards
-            # )
             direction = (
                         follower.heading_degrees()
                         - follower.location().degrees_to_precise(prop.prop_info.location)
@@ -361,11 +343,11 @@ def DescribeMap(
             distance = follower.location().distance_to(prop.prop_info.location)
             # Only show shape, color, count for selected cards.
             if prop.card_init.selected:
-                prop_descriptions.append(
-                    f"Selected card at heading {direction:.0f} and distance {distance:.1f}: CARD. Shape {prop.card_init.shape.name}, color {prop.card_init.color.name}, count {prop.card_init.count}"
+                selected_card_descriptions.append(
+                    f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD. Shape {prop.card_init.shape.name}, color {prop.card_init.color.name}, count {prop.card_init.count}"
                 )
             else:
-                prop_descriptions.append(
+                unselected_card_descriptions.append(
                     f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD"
                 )
     # Describe the map metadata
@@ -459,7 +441,10 @@ def DescribeMap(
     prompt = (
         header
         + "CARDS DESCRIPTIONS\n\t"
-        + "\n\t".join(prop_descriptions)
+        + "SELECTED CARDS:\n\t"
+        + "\n\t".join(selected_card_descriptions)
+        + "\nUNSELECTED CARDS:\n\t"
+        + "\n\t".join(unselected_card_descriptions)
         + "\nMAP DESCRIPTION\n\t"
         + "\n\t".join(metadata_descriptions)
         + "\nNEARBY TILES\n\t"

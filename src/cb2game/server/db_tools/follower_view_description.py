@@ -222,15 +222,15 @@ def get_instruction_to_location(
             location = next_location
             continue
         if degrees_away == 120:
-            instructions.append("left")
-            instructions.append("backward")
-            heading -= 60
+            instructions.extend(["right"] * 2)
+            instructions.append("forward")
+            heading += 120
             location = next_location
             continue
         if degrees_away == -120:
-            instructions.append("right")
-            instructions.append("backward")
-            heading += 60
+            instructions.extend(["left"] * 2)
+            instructions.append("forward")
+            heading -= 120
             location = next_location
             continue
         # General-case movement pattern.
@@ -321,32 +321,9 @@ def DescribeMap(
     default_config = Config()
     visible_coord = VisibleCoordinates(follower_location, follower_orientation, default_config)
 
-    instruction_descriptions = []
-    for i, instruction in enumerate(instructions):
-        # Determine instruction status from instruction.completed, instruction.cancelled (if neither, then in progress).
-        if instruction.completed:
-            status = "completed"
-        elif instruction.cancelled:
-            status = "cancelled"
-        else:
-            status = "ACTIVE"
-        instruction_descriptions.append(
-            f"Status: {status}, Instruction: {instruction.text}"
-        )
-        # There can only be one active instruction at a time. Any instructions after this are queued for future reveal. End iteration.
-        if status == "ACTIVE":
-            break
-
-    # Print each instruction description on a line, indented:
-    instruction_section = "INSTRUCTIONS\n"
-    for instruction in instruction_descriptions:
-        instruction_section += f"\t{instruction}\n"
-    if turn_state is not None:
-        # Describe the turn state
-        turn_state_description = f"Moves remaining: {turn_state.moves_remaining}.\n\tWho's turn it is: {turn_state.turn}.\n\tTurns left before end of game: {turn_state.turns_left}.\n\tCurrent Score: {turn_state.score}.\n\tGame Over:{turn_state.game_over}\n"
-
     # Describe the cards
-    prop_descriptions = []
+    selected_cards_descriptions = []
+    unselected_cards_descriptions = []
     for prop in props:
         if prop.prop_type == PropType.CARD:
             location_description = DescribeLocationFromActor( # 返回一个字符串，描述follower到prop的路径
@@ -366,13 +343,9 @@ def DescribeMap(
             distance = follower_location.distance_to(prop.prop_info.location)
             # Only show shape, color, count for selected cards.
             if prop.card_init.selected:
-                prop_descriptions.append(f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD\n\t\t{prop.prop_info.location}\n\t\t{location_description}")
-                prop_descriptions.append(f"card selected. Shape {prop.card_init.shape.name}, color {prop.card_init.color.name}, count {prop.card_init.count}")
-                # prop_descriptions.append(
-                #     f"Selected card at {location_description}. Shape {prop.card_init.shape.name}, color {prop.card_init.color.name}, count {prop.card_init.count}"
-                # )
+                selected_cards_descriptions.append(f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD\n\t\t{prop.prop_info.location}\n\t\t{location_description}")
             else:
-                prop_descriptions.append(f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD\n\t\t{prop.prop_info.location}\n\t\t{location_description}")
+                unselected_cards_descriptions.append(f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD\n\t\t{prop.prop_info.location}\n\t\t{location_description}")
                 # prop_descriptions.append(f"Card at {location_description}.")
 
     # Describe nearby tiles
@@ -411,9 +384,6 @@ def DescribeMap(
             nearby_tiles.append(f"Tile at heading -60 and distance 1.0: {AssetId(tile.asset_id).name}\n\t\t{tile.cell.coord}\n\t\tPath to reach: right, forward")
         elif tile.cell.coord == follower_location:
             continue
-        # elif tile.asset_id in NatureAssetIds() + [
-        #     AssetId.GROUND_TILE_TREE_SNOW
-        # ] + TreeAssetIds() + [AssetId.GROUND_TILE_PATH]:
         else:
             if tile.cell.coord not in visible_coord:
                 continue
@@ -422,32 +392,19 @@ def DescribeMap(
             further_tiles.append(
                 f"Tile at heading {direction:.0f} and distance {distance:.1f}: {AssetId(tile.asset_id).name}\n\t\t{tile.cell.coord}\n\t\t{tile_description}"
             )
-            # Describe tiles not covered in mountains, lakes, or cities.
     # Combine all descriptions
-    if only_map:
-        prompt = (
-            header
-            + "PROP DESCRIPTIONS\n\t"
-            + "\n\t".join(prop_descriptions)
-            + "\nNEARBY TILES\n\t"
-            + "\n\t".join(nearby_tiles)
-            + "\nFURTHER TILES\n\t"
-            + "\n\t".join(further_tiles)
-        )
-    else:
-        prompt = (
-            header
-            + instruction_section
-            + "\n"
-            + "CARDS DESCRIPTIONS\n\t"
-            + "\n\t".join(prop_descriptions)
-            + "\nTURN_STATE\n\t"
-            + turn_state_description
-            + "\nNEARBY TILES\n\t"
-            + "\n\t".join(nearby_tiles)
-            + "\nFURTHER TILES\n\t"
-            + "\n\t".join(further_tiles)
-        )
+    prompt = (
+        header
+        + "CARDS DESCRIPTIONS\n\t"
+        + "SELECTED CARDS:\n\t"
+        + "\n\t".join(selected_cards_descriptions)
+        + "\nUNSELECTED CARDS:\n\t"
+        + "\n\t".join(unselected_cards_descriptions)
+        + "\nNEARBY TILES\n\t"
+        + "\n\t".join(nearby_tiles)
+        + "\nFURTHER TILES\n\t"
+        + "\n\t".join(further_tiles)
+    )
     return prompt
 
 def draw_follower_view(
