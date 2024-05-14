@@ -159,10 +159,9 @@ class GeminiVisionFollowerAtomic(Agent):
             print("=========================================================")
             p1 = f"""
             Here in the instruction you received from the leader: {instrs[-1].text}
-            Here is the structured string representing your first-view map: \n{description}
             the corresponding first-view RGB image: \n
             """
-            p2 = "Here is the structured string representing your first-view map: \n{description}"
+            p2 = f"Here is the structured string representing your first-view map: \n{description}"
             p3 = "Please provide your response:\n"
             prompt = [p1, self.image_parts[-1], p2, p3]  
             self.current_instruction = instrs[-1].text
@@ -174,7 +173,7 @@ class GeminiVisionFollowerAtomic(Agent):
             Here in the new instruction you received from the leader: {self.deferred_task}
             the new corresponding first-view RGB image: \n
             """
-            p2 = "Here is the new structured string representing your first-view map: \n{description}"
+            p2 = f"Here is the new structured string representing your first-view map: \n{description}"
             p3 = "Please provide your response:\n"
             prompt = [p1, self.image_parts[-1], p2, p3] 
         with open("game_history.txt", "w") as f:
