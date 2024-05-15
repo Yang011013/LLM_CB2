@@ -8,10 +8,17 @@ import collections
 import torch
 
 from follower_bots.constants import TORCH_DEVICE
+import follower_bots.constants as const
 from follower_bots.models.ensembled_models import FollowerEnsemble
 from follower_bots.models.follower_transformers import DecisionTransformer
 from follower_bots.utils import load_arguments
 
+class Config:
+    def __init__(self, args):
+        self.experiments_folder = args["experiments_folder"]  # "follower_bots/experiments/pretraining/deployment_models"
+        self.experiments_name = args["experiments_name"]
+        self.use_ensembling = args["use_ensembling"]
+        self.sampling_strat = const.SAMPLING_STRAT
 
 def save_checkpoints(
     follower,
@@ -164,6 +171,7 @@ def load_follower_model_for_corpora_eval_standard(args):
     return follower
 
 def load_follower_model_for_corpora_eval(args):
+    args = Config(args)
     "ensembled" if args.use_ensembling else "normal"
     if args.use_ensembling:
         return load_follower_model_for_corpora_eval_ensembled(args)

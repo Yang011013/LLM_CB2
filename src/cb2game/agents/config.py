@@ -18,6 +18,7 @@ from cb2game.agents.gemini_vision_follower import GeminiVisionFollower, GeminiVi
 from cb2game.agents.gemini_vision_follower_atomic import GeminiVisionFollowerAtomic, GeminiVisionFollowerConfigAtomic
 from cb2game.agents.claude_follower import ClaudeFollower, ClaudeFollowerConfig
 from cb2game.agents.claude_vision_follower import ClaudeVisionFollower, ClaudeVisionFollowerConfig
+from cb2game.agents.baseline_follower import BaselineFollower, BaselineFollowerConfig
 from cb2game.util.deprecated import deprecated
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,8 @@ class AgentConfig(DataClassJSONMixin):
         GeminiVisionFollowerConfig,
         GeminiVisionFollowerConfigAtomic,
         ClaudeFollowerConfig,
-        ClaudeVisionFollowerConfig
+        ClaudeVisionFollowerConfig,
+        BaselineFollowerConfig,
     ]
 
 
@@ -101,5 +103,7 @@ def LoadAgentFromConfig(config_data: AgentConfig) -> Agent:
         return ClaudeFollower(config_data.config)
     elif config_data.agent_type == "CLAUDE_VISION_FOLLOWER":
         return ClaudeVisionFollower(config_data.config)
+    elif config_data.agent_type == "BASELINE_FOLLOWER":
+        return BaselineFollower(config_data.config)
     else:
         raise ValueError(f"Unknown agent type: {config_data.agent_type}")

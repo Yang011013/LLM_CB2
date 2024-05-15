@@ -174,6 +174,7 @@ asset_to_properties = {
         MapProperty["HOUSE_TRIPLE"],
         MapProperty["HOUSE_COLOR_BLUE"],
     ],
+
     # Miscellaneous props
     AssetId.GROUND_TILE_STREETLIGHT.value: [MapProperty["STREETLIGHT"]],
     AssetId.GROUND_TILE_PATH.value: [MapProperty["PATH"]],
@@ -195,6 +196,7 @@ asset_to_properties = {
     ],
     AssetId.SNOWY_MOUNTAIN_TILE.value: [MapProperty["MOUNTAIN"], MapProperty["SNOW"]],
     AssetId.SNOWY_RAMP_TO_MOUNTAIN.value: [MapProperty["RAMP"], MapProperty["SNOW"]],
+
     AssetId.MOUNTAIN_TILE_TREE.value: [
         MapProperty["TREES"],
         MapProperty["TREE_DEFAULT"],
@@ -204,6 +206,11 @@ asset_to_properties = {
         MapProperty["TREE_DEFAULT"],
         MapProperty["SNOW"],
     ],
+    AssetId.GROUND_TILE_STREETLIGHT_FOILAGE.value: [MapProperty["STREETLIGHT"]],
+    AssetId.STREETLIGHT_BIG.value: [MapProperty["STREETLIGHT"]],
+    AssetId.STREETLIGHT_BUSHES.value: [MapProperty["STREETLIGHT"]],
+    AssetId.STREETLIGHT_ROCKS.value: [MapProperty["STREETLIGHT"]],
+    AssetId.STREETLIGHT_WIDE.value: [MapProperty["STREETLIGHT"]],
 }
 
 
@@ -291,6 +298,9 @@ class StaticMap:
 
         # Asset id processing
         asset_id = tile.asset_id
+        print(asset_to_properties.keys())
+        print("===============")
+        print(asset_to_properties.values())
         asset_props = asset_to_properties[asset_id]
         props.extend(asset_props)
 
