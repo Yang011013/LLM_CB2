@@ -296,12 +296,24 @@ def SystemPrompt() -> str:
 
     instruction from the leader: "take five steps forward then turn around" \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 5.0: GROUND_TILE_PATH", "Deferred Task": "turn around"} \n
-    
+
+    instruction from the leader: "take four steps forward" \n
+    Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 4.0: GROUND_TILE_PATH", "Deferred Task": "NULL"} \n
+
     instruction from the leader: "select the card on distant right of you" \n
     Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 5.0: CARD", "Deferred Task": "NULL"} \n
     
-    instruction from the leader: "waite" \n
+    instruction from the leader: "Pick up the card by the lake"\n
+    Output: {"Immediate Task": "Next Location: Tile at heading 23 and distance 4.4: GROUND_TILE_PATH", "Deferred Task": "NULL"} \n
+    
+    instruction from the leader: "wait" \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 0: GROUND_TILE", "Deferred Task": "NULL"} \n
+    
+    instruction from the leader: ""Go up the mountain and get the card"\n
+    Output: {"Immediate Task": "Next Location: Tile at heading -41 and distance 2.6: MOUNTAIN_TILE", "Deferred Task": "Get the card on the mountain tile."} \n
+    
+    instruction from the leader: ""Go up the mountain through the ramp"\n
+    Output: {"Immediate Task": "Next Location: Tile at heading -41 and distance 2.6: RAMP_TO_MOUNTAIN", "Deferred Task": "take one step forward"} \n
     """
     return system_prompt
 
@@ -441,9 +453,9 @@ def DescribeMap(
     prompt = (
         header
         + "CARDS DESCRIPTIONS\n\t"
-        + "SELECTED CARDS:\n\t"
+        + "SELECTED CARDS:\n\t\t"
         + "\n\t\t".join(selected_card_descriptions)
-        + "\n\tUNSELECTED CARDS:\n\t"
+        + "\n\tUNSELECTED CARDS:\n\t\t"
         + "\n\t\t".join(unselected_card_descriptions)
         + "\nMAP DESCRIPTION\n\t"
         + "\n\t".join(metadata_descriptions)

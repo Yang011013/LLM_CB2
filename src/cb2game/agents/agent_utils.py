@@ -154,7 +154,11 @@ def get_action_string(response_dict, mapu, prop_update, follower):
         if "Deselect" in immediate_task:
             action_string = deselect_card(mapu, description_atomic, follower, card_location)
         elif "Select" in immediate_task:
-            action_string = find_matching_tiles(description_atomic, card_location)
+            if "distance 0.0" in card_location:
+                # 如果follower在卡片上，那么只能选择卡片相当于取消选择卡片
+                action_string = deselect_card(mapu, description_atomic, follower, card_location)
+            else:
+                action_string = find_matching_tiles(description_atomic, card_location)
 
     elif "Next Location" in immediate_task:  # Type3: Next Location
         action_string = find_matching_tiles(description_atomic, immediate_task.split("Next Location:")[1].strip())
