@@ -275,7 +275,7 @@ def RunEval(
                     break
                     # continue
                 if "gemini" in agent.model_name:
-                    response,action = agent.choose_action(game_state, endpoint_pair.follower())
+                    response,action = agent.choose_action(game_state, endpoint_pair.follower(),test=True)
                     if len(responses) > 0:
                         responses.append(response)
                     game_state = endpoint_pair.step(action)

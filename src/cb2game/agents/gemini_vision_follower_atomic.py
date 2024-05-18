@@ -134,13 +134,13 @@ class GeminiVisionFollowerAtomic(Agent):
         return True
 
     # OVERRIDES choose_action
-    def choose_action(self, game_state: GameState, game=None, action_number=None, action_mask=None) -> Action:
+    def choose_action(self, game_state: GameState, game=None, action_number=None, action_mask=None, test=False) -> Action:
         # Fetch more actions.
         [mapu, props, turn_state, instrs, _, _] = game_state # 5.13这里返回是整个地图的mapu
         (leader, follower) = get_actors(game_state)
         follower_map_update = CensorFollowerMap(mapu, follower, self.server_config)
         # 测试的情况下
-        if instrs[-1].text != self.current_instruction:
+        if instrs[-1].text != self.current_instruction and test:
             self.action_queue = []
         if len(self.action_queue) > 0 and self.queueing_enabled:
             return "", self.action_queue.pop(0)
