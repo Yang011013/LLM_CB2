@@ -45,7 +45,7 @@ def actions_from_code(action_code, i_uuid: str = None):
     return actions
 
 def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at heading  <angle> and distance <distance>: <TILE_TYPE>
-    if "distance 0.0" in keyword:
+    if "distance 0" in keyword:
         return ""
     lines = data.split('\n')
     matching_line = ""
@@ -63,7 +63,7 @@ def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at headin
 
 def deselect_card(mapu, description_atomic, follower, card_location):
     # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
-    if "distance 0:" in card_location:
+    if "distance 0" in card_location:
         # 还要考虑follower的朝向
         follower_orientation = follower.heading_degrees() - 60
         atomic_instructions = []
@@ -139,7 +139,6 @@ def get_action_string(response_dict, mapu, prop_update, follower):
     action_string = ""
     if "Card Interaction" in immediate_task or "Next Location" in immediate_task:  # Type1: Change Direction
         start_time = time.time()
-        print("search tiles length: ", len(mapu.tiles))
         description_atomic = follower_view_description.DescribeMap(mapu, prop_update.props, follower.location(),
                                                                    follower.heading_degrees())
         end_time = time.time()
@@ -154,7 +153,7 @@ def get_action_string(response_dict, mapu, prop_update, follower):
         if "Deselect" in immediate_task:
             action_string = deselect_card(mapu, description_atomic, follower, card_location)
         elif "Select" in immediate_task:
-            if "distance 0.0" in card_location:
+            if "distance 0" in card_location:
                 # 如果follower在卡片上，那么只能选择卡片相当于取消选择卡片
                 action_string = deselect_card(mapu, description_atomic, follower, card_location)
             else:

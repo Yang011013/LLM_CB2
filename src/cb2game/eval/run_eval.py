@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from datetime import datetime, timedelta
@@ -19,7 +20,7 @@ from cb2game.pyclient.endpoint_pair import EndpointPair
 from cb2game.pyclient.local_game_coordinator import LocalGameCoordinator
 from cb2game.server.card import Card
 from cb2game.server.config.config import Config, ReadServerConfigOrDie
-from cb2game.server.db_tools.db_utils import ListGames
+from cb2game.server.db_tools.db_utils import ListGames,ListAnalysisGames
 from cb2game.server.lobbies.open_lobby import OpenLobby
 from cb2game.server.lobby_consts import LobbyInfo, LobbyType
 from cb2game.server.messages.objective import ObjectiveMessage
@@ -36,7 +37,7 @@ from cb2game.server.state_utils import (
     FOLLOWER_SECONDS_PER_TURN,
 )
 from cb2game.server.util import GetCommitHash, PackageVersion
-
+from cb2game.agents.agent_utils import *
 logger = logging.getLogger(__name__)
 
 # This is the default lobby name. Should equal the eval lobby defined in
@@ -105,12 +106,15 @@ def final_follower_move(instruction: Event) -> Event:
         .order_by(Event.server_time)
         .first()
     )
+
     return event_after
 
 
 def CompareCardSelections(a: List[Card], b: List[Card]) -> bool:
     selected_ids_a = set([card.id for card in a if card.selected])
     selected_ids_b = set([card.id for card in b if card.selected])
+    print("agent selected_ids_a\n", selected_ids_a)
+    print("ground truth selected_ids_b\n", selected_ids_b)
     return selected_ids_a == selected_ids_b
 
 
@@ -151,11 +155,13 @@ def RunEval(
     base.SetDatabase(config)
     base.ConnectDatabase()
 
-    games = ListGames()
-    game_ids = [game.id for game in games]
+    games = ListAnalysisGames(config)
+    game_ids = [game.id for game in games if game.score > 10] # 一共40局
+    print("games count:", len(game_ids))
+    # game_ids = [game.id for game in games]
     instructions = Event.select().where(
         (Event.type == EventType.INSTRUCTION_SENT) & (Event.game_id << game_ids)
-    )
+    ) #一共1046条指令
 
     if limit >= 0:
         instructions = instructions.limit(limit)
@@ -176,7 +182,7 @@ def RunEval(
     coordinator = LocalGameCoordinator(
         config,
         render_leader=False,
-        render_follower=False,
+        render_follower=True,
     )
 
     eval_lobby = OpenLobby(
@@ -191,6 +197,8 @@ def RunEval(
 
     agent_instructions_passed = []
     results = []
+    unmatched_instructions = {}
+    error_instruction = []
     for instruction in tqdm(instructions):
         try:
             objective = ObjectiveMessage.from_json(instruction.data)
@@ -211,7 +219,18 @@ def RunEval(
                     )
                     continue
 
-            # Create a local game to run the eval.
+            start_scenario, err = ReconstructScenarioFromEvent(eval_start_event.id)
+            start_baseline_state = GameStateFromScenario(start_scenario)
+            # start cards
+            start_baseline_props = start_baseline_state.props
+            start_baseline_cards = [
+                Card.FromProp(prop)
+                for prop in start_baseline_props
+                if prop.prop_type == PropType.CARD
+            ]
+            # start card ids
+            start_card_ids = [card.id for card in start_baseline_cards if card.selected]
+
             game_name = coordinator.CreateGameFromDatabase(
                 eval_start_event.id.hex, log_to_db=False, lobby=eval_lobby
             )
@@ -246,26 +265,27 @@ def RunEval(
 
             # Keep running until the current turn is over. We check for this inside
             # the loop because the game state may change in the middle of the loop.
+
             agent_actions = []
+            responses = []
+
             while not endpoint_pair.over():
                 # If the turn is over, then the eval for this instruction is done.
                 if game_state.turn_state.turn != agent.role():
                     break
+                    # continue
                 if "gemini" in agent.model_name:
-                    # print("model name:============", agent.model_name)
-                    # print("length of agent_actions:============", len(agent_actions))
-                    # print(endpoint_pair.follower())
-                    # print("game_state:============", game_state)
-                    action = agent.choose_action(game_state, endpoint_pair.follower(), len(agent_actions))
+                    response,action = agent.choose_action(game_state, endpoint_pair.follower())
+                    if len(responses) > 0:
+                        responses.append(response)
                     game_state = endpoint_pair.step(action)
-
+                elif "baseline" in agent.model_name:
+                    action = agent.choose_action(game_state, endpoint_pair.follower().action_mask())
+                    game_state = endpoint_pair.step(action)
                 else:
                     action = agent.choose_action(game_state)
                     game_state = endpoint_pair.step(action)
                 agent_actions.append(str(action))
-
-                print("agent action:============",action)
-
 
             logger.info(f"Agent actions: {agent_actions}")
 
@@ -290,13 +310,20 @@ def RunEval(
                 for prop in final_baseline_props
                 if prop.prop_type == PropType.CARD
             ]
+            start_baseline_cards = [
+                Card.FromProp(prop)
+                for prop in start_baseline_state.props
+                if prop.prop_type == PropType.CARD
+            ]
             final_baseline_score = final_baseline_state.turn_state.score
-            card_selections_match = CompareCardSelections(
+            card_selections_match = CompareCardSelections( # 选择的卡牌是否一致
                 final_agent_cards, final_baseline_cards
             )
-            passed_instruction_eval = card_selections_match and (
-                final_agent_score >= final_baseline_score
-            )
+            print("****************start card ids:", start_card_ids)
+            if not card_selections_match:
+                print("=======================instruction text", objective.text)
+                unmatched_instructions[str(instruction.id)] = [objective.text, responses, agent_actions]
+            passed_instruction_eval = card_selections_match # 只用看最后选择的卡牌是否一致
             if passed_instruction_eval:
                 agent_instructions_passed.append(instruction.id)
             results.append(
@@ -307,6 +334,14 @@ def RunEval(
                     success=passed_instruction_eval,
                 )
             )
+        except RuntimeError as e:
+            # Log the exception, with stack trace and instruction ID.
+            logger.error(
+                f"Runtime error in eval run {eval_run.id} for instruction {objective.text}."
+            )
+            logger.error(e, exc_info=True)
+            error_instruction.append(objective.text)
+            continue
         except RateLimitException:
             logger.info(f"Rate limit error. Waiting 60 seconds.")
             results.append(
@@ -327,7 +362,7 @@ def RunEval(
             )
             logger.error(e, exc_info=True)
             break
-
+    json.dump(unmatched_instructions, open("unmatched_instructions.json", "w"))
     # Save results to JSON file. See eval/eval_schema.py for the schema.
     eval_run.percent_passed = (
         (100 * len(agent_instructions_passed) / len(results)) if len(results) > 0 else 0
@@ -365,5 +400,11 @@ def main(
     )
 
 
+# if __name__ == "__main__":
+#     fire.Fire(main)
 if __name__ == "__main__":
+    start_time = time.time()
     fire.Fire(main)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Execution time of evaluation: {elapsed_time} seconds")

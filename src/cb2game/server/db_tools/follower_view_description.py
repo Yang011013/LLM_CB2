@@ -302,11 +302,8 @@ def DescribeLocationFromActor(location: HecsCoord, follower_location, follower_o
 def DescribeMap(
     map_update: MapUpdate,
     props,
-    instructions: List[ObjectiveMessage],
     follower_location = None,
     follower_orientation = None,
-    only_map = True,
-    turn_state = None,
 ) -> str:
     """Returns a string describing the given map."""
     header = f"MAP DIMENSIONS:\n\t{map_update.rows}x{map_update.cols} hexagon map with {len(props)} props. \n"
@@ -361,7 +358,6 @@ def DescribeMap(
     )
     further_tiles = []
     follower_mapu = CensorFollowerMap(map_update, follower_location, follower_orientation, default_config)
-    print("follower_mapu tiles: ", len(follower_mapu.tiles))
     for tile in follower_mapu.tiles:
         direction = (
                 follower_orientation
@@ -417,7 +413,6 @@ def draw_follower_view(
     props: List[prop_msg.Prop],  # 只限card
     config,
     description,
-    only_map, # 只描述地图信息，不描述turn state和instruction
 ):
 
     trajectory = [(move.location, move.orientation) for move in moves]
@@ -426,10 +421,14 @@ def draw_follower_view(
         display = visualize.GameDisplay(SCREEN_SIZE)
         display.set_config(config)
 
+        # follower_map_update = CensorFollowerMap(map_update, location, orientation, config)
+        # display.set_map(follower_map_update)
+        # follower_props = CensorFollowerProps(props, location, orientation, config)
+        # display.set_props(follower_props)
         follower_map_update = CensorFollowerMap(map_update, location, orientation, config)
-        display.set_map(follower_map_update)
+        display.set_map(map_update)
         follower_props = CensorFollowerProps(props, location, orientation, config)
-        display.set_props(follower_props)
+        display.set_props(props)
 
         display.draw()
         display.visualize_follower_location_orientation(location, orientation)
@@ -452,21 +451,24 @@ def draw_follower_view(
 
         if description:
             description_filename = file_path / f"{instr}_{n}_description.txt"
+            # map_description = DescribeMap(
+            #     follower_map_update, follower_props, [instruction], location, orientation, only_map,
+            # )
             map_description = DescribeMap(
-                follower_map_update, follower_props, [instruction], location, orientation, only_map,
+                follower_map_update, follower_props, location, orientation,
             )
             # 保存到文件
             print(description_filename)
             with open(description_filename, "w") as file:
                 file.write(map_description)
 
-        crop_non_white_square(filename)
+        # crop_non_white_square(filename)
         # break
 
 def main(
     max_instructions=-1,
-    config_filepath="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data/cb2-data-base/config/human_model.yaml",
-    output_dir="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_view/human_model/",
+    config_filepath="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data/cb2-data-base/config/human_human.yaml",
+    output_dir="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_view/human_human/",
     research_only=True,
 ):
     logging.basicConfig(level=logging.INFO)
@@ -498,6 +500,7 @@ def main(
     print(f"Found {len(games)} games.")
     ParentEvent = Event.alias()
     # For each game.
+    instructions_uuid = {"uuids": [], "instructions": []}
     for game in games:
         # Create a directory for the game.
         game_dir = output_dir / str(game.id)
@@ -579,7 +582,8 @@ def main(
             dt_string = instruction.server_time.strftime("%Y-%m-%d_%H-%M-%S")
             filepath = game_dir / f"instruction_vis_{dt_string}.png"
             instruction_obj = ObjectiveMessage.from_json(instruction.data)
-
+            instructions_uuid["instructions"].append(instruction_obj.text)
+            instructions_uuid["uuids"].append(instruction_obj.uuid)
             follower_file_path = game_dir #
             draw_follower_view(
                 instruction_obj,
@@ -590,8 +594,7 @@ def main(
                 game.id,
                 props, #只限card
                 cfg,
-                description=True,
-                only_map=True,
+                description=False,
             )
 
             instruction_list.append(instruction_obj.text)
@@ -600,8 +603,11 @@ def main(
             if max_instructions == 0:
                 break
             max_instructions -= 1
-            break
-        break
+        with open("instructions_uuid.json", "w") as f:
+            json.dump(instructions_uuid, f)
+        #     break
+        # break
+
     # print how many instructions and unique words there are.
     print(f"{len(instruction_list)} instructions")
     print(f"{len(words)} unique words")

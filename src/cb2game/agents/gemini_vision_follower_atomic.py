@@ -93,17 +93,26 @@ class GeminiVisionFollowerAtomic(Agent):
             "top_k": config["top_k"],
             "max_output_tokens": config["max_output_tokens"],
         }
-        self.model = genai.GenerativeModel(model_name=self.model_name,
-                                            generation_config=self.gemini_config,
-                                            safety_settings=self.safety_settings)
+        if self.model_name is not None:
+            self.model = genai.GenerativeModel(model_name=self.model_name,
+                                                generation_config=self.gemini_config,
+                                                safety_settings=self.safety_settings)
+        else:
+            self.model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest",
+                                                generation_config=self.gemini_config,
+                                                safety_settings=self.safety_settings)
+        # self.model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest")
         self.system_prompt = SystemPrompt()
         self.game_history = []
         self.current_instruction = ''
         self.image_parts = []
         self.deferred_task = ""
+        self.last_deferred_task = ""
 
         self.action_queue = []
         self.turn_number = 0
+
+
 
     def role(self) -> Role:
         return Role.FOLLOWER
@@ -126,13 +135,15 @@ class GeminiVisionFollowerAtomic(Agent):
 
     # OVERRIDES choose_action
     def choose_action(self, game_state: GameState, game=None, action_number=None, action_mask=None) -> Action:
-        if len(self.action_queue) > 0 and self.queueing_enabled:
-            return self.action_queue.pop(0)
         # Fetch more actions.
         [mapu, props, turn_state, instrs, _, _] = game_state # 5.13这里返回是整个地图的mapu
         (leader, follower) = get_actors(game_state)
         follower_map_update = CensorFollowerMap(mapu, follower, self.server_config)
-
+        # 测试的情况下
+        if instrs[-1].text != self.current_instruction:
+            self.action_queue = []
+        if len(self.action_queue) > 0 and self.queueing_enabled:
+            return "", self.action_queue.pop(0)
         follower_props = CensorFollowerProps(props, follower, self.server_config)
         prop_update = PropUpdate(follower_props)
 
@@ -140,14 +151,18 @@ class GeminiVisionFollowerAtomic(Agent):
         # 保存description到text文件
         with open("description.txt", "w") as f:
             f.write(description)
-
         # 保存第一视角图片
         # game.visualization().visualize_follower_visibility(self.turn_number, action_number)
-        game.visualization().visualize_follower_visibility(0, 0)
-        first_view_image_path = crop_non_white_square(f"follower_view/follower_visibility_0_0.png")
-        image_data = Path(first_view_image_path).read_bytes()
-        self.image_parts.append({"mime_type": "image/png", "data": image_data})
-
+        try:
+            game.visualization().visualize_follower_visibility(101, 101)
+            first_view_image_path = crop_non_white_square("follower_view/follower_visibility_101_101.png")
+            image_data = Path(first_view_image_path).read_bytes()
+            self.image_parts.append({"mime_type": "image/png", "data": image_data})
+        except Exception as e:
+            game.visualization().visualize_follower_visibility(0, 0)
+            first_view_image_path = crop_non_white_square("follower_view/follower_visibility_0_0.png")
+            image_data = Path(first_view_image_path).read_bytes()
+            self.image_parts.append({"mime_type": "image/png", "data": image_data})
         if instrs[-1].text != self.current_instruction:
             print("=========================================================")
             print("instruction: ",instrs[-1].text)
@@ -156,9 +171,9 @@ class GeminiVisionFollowerAtomic(Agent):
             Here in the instruction you received from the leader: {instrs[-1].text}
             the corresponding first-view png image: \n
             """
-            p2 = f"Here is the structured string representing your first-view map: \n{description}"
+            p2 = f"""Here is the structured string representing your first-view map: \n{description}"""
             p3 = "Please provide your response:\n"
-            prompt = [p1, self.image_parts[-1], p2, p3]  
+            prompt = [p1, self.image_parts[-1], p2, p3]
             self.current_instruction = instrs[-1].text
             # 每得到一个新的指令重置记忆
             self.game_history = []
@@ -168,16 +183,17 @@ class GeminiVisionFollowerAtomic(Agent):
             Here in the new instruction you received from the leader: {self.deferred_task}
             the new corresponding first-view png image: \n
             """
-            p2 = f"Here is the new structured string representing your first-view map: \n{description}"
+            p2 = f"""Here is the structured string representing your first-view map: \n{description}"""
             p3 = "Please provide your response:\n"
-            prompt = [p1, self.image_parts[-1], p2, p3] 
-        with open("game_history.txt", "w") as f:
-            f.write(str(self.game_history))
+            prompt = [p1, self.image_parts[-1], p2, p3]
         self.game_history = prompt
-        response = call_gemini_api_sync(messages=[self.system_prompt] + self.game_history,
-                                        model=self.model)
-        
-
+        try:
+            response = call_gemini_api_sync(messages=[self.system_prompt] + self.game_history,
+                                            model=self.model)
+        except Exception as e:
+            time.sleep(3)
+            response = call_gemini_api_sync(messages=[self.system_prompt] + self.game_history,
+                                            model=self.model)
         if not response:
             self.game_history += ["model: Do nothing!"]
             return Action.NoopAction()
@@ -185,7 +201,7 @@ class GeminiVisionFollowerAtomic(Agent):
             response_text = response.text
             self.game_history += [f"{response_text}"]
         action_string = ""
-        if self.model_name == "gemini-1.5-pro-latest":
+        if "json" in response_text:
             start_index = response_text.find("{") 
             end_index = response_text.find("}")
             response_text = response_text[start_index:end_index+1]
@@ -193,8 +209,13 @@ class GeminiVisionFollowerAtomic(Agent):
         print("response:\n",response_text)
         response_dict = json.loads(response_text)
         self.deferred_task = response_dict["Deferred Task"]
-
-        action_string = get_action_string(response_dict, mapu, prop_update, follower)
+        # 如果LLM输出重复的deffered_task，返回done
+        if self.last_deferred_task == self.deferred_task:
+            self.last_deferred_task = ""
+            action_string = "done"
+        else:
+            self.last_deferred_task = self.deferred_task
+            action_string = get_action_string(response_dict, mapu, prop_update, follower)
         active_instruction = get_active_instruction(instrs)
         actions = actions_from_code(action_string, active_instruction.uuid)
 
@@ -202,15 +223,18 @@ class GeminiVisionFollowerAtomic(Agent):
             return Action.NoopAction()
         if self.queueing_enabled:
             self.action_queue = actions[1:]
-            return actions[0]
+            return response_text,actions[0]
 
-        return actions[0]
+        return response_text,actions[0]
+
 
 
 # @timeout_decorator(timeout=120)
-# @delay_execution(delay_time=10)
+@delay_execution(delay_time=1)
 def call_gemini_api_sync(messages, model):
-    response = model.generate_content(messages)
+    with open ("messages.txt", "w") as f:
+        f.write(str(messages))
+    response = model.generate_content(contents=messages)
     return response
 
 
