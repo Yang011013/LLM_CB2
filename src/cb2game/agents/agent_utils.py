@@ -38,7 +38,11 @@ def actions_from_code(action_code, i_uuid: str = None):
             actions.append(Action.Right())
         elif "done".startswith(c) or "d".startswith(c):
             actions.append(Action.InstructionDone(i_uuid))
+        elif "done" in c:
+            actions.append(Action.InstructionDone(i_uuid))
         elif "noop" in c:
+            actions.append(Action.NoopAction())
+        elif len(c) == 0:
             actions.append(Action.NoopAction())
         else:
             logger.warning(f"Invalid action code: {c}")
@@ -46,7 +50,7 @@ def actions_from_code(action_code, i_uuid: str = None):
 
 def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at heading  <angle> and distance <distance>: <TILE_TYPE>
     if "distance 0" in keyword:
-        return ""
+        return "done"
     lines = data.split('\n')
     matching_line = ""
     found = False
@@ -86,7 +90,7 @@ def deselect_card(mapu, description_atomic, follower, card_location):
             # 如果当前follower在RAMP上，志强选择""forward, backward, forward"或者"backward, forward, backward"
             if mapu.get_tile_id(follower.location()) in [31, 36]:
                 # 先不考虑ramp的朝向
-                atomic_instructions.append("forward, backward, forward")
+                atomic_instructions.append("forward, backward")
                 continue
             degrees_away = follower.location().degrees_to(neighbors_location) - follower_orientation
             if degrees_away < 0:
@@ -101,7 +105,7 @@ def deselect_card(mapu, description_atomic, follower, card_location):
                 atomic_instructions.append("left, backward, forward")
                 #atomic_instructions.append("right, right, forward, backward")
             elif degrees_away == 180:
-                atomic_instructions.append("backward, forward, backward")
+                atomic_instructions.append("backward, forward")
             elif degrees_away == -60:
                 atomic_instructions.append("left, forward, backward")
             elif degrees_away == -120:
@@ -148,8 +152,11 @@ def get_action_string(response_dict, mapu, prop_update, follower):
 
     if "Change Direction" in immediate_task:  # Type1: Change Direction
         action_string = immediate_task.split(":")[1].strip()
-    elif "Card Interaction" in immediate_task:  # Type3: Next Location
+    elif "Move" in immediate_task:  # Type2: Move
+        action_string = immediate_task.split(":")[1].strip()
+    elif "Card Interaction" in immediate_task:  # Type4: Card Interaction
         card_location = immediate_task.split("Card at")[1].strip()
+
         if "Deselect" in immediate_task:
             action_string = deselect_card(mapu, description_atomic, follower, card_location)
         elif "Select" in immediate_task:
@@ -164,7 +171,8 @@ def get_action_string(response_dict, mapu, prop_update, follower):
     else:
         action_string = "done"
     if deferred_task == "NULL":
-        action_string += ",done"
+        if action_string.split(",")[-1] != "done":
+            action_string += ",done"
     return action_string
 
 def delay_execution(delay_time):
