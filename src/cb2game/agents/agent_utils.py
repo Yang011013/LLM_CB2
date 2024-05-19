@@ -64,58 +64,6 @@ def find_matching_tiles(data, keyword):# keyword-->Next Location: Tile at headin
                     break
             break
     return matching_line
-
-def deselect_card(mapu, description_atomic, follower, card_location):
-    # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
-    if "distance 0" in card_location:
-        # 还要考虑follower的朝向
-        follower_orientation = follower.heading_degrees() - 60
-        atomic_instructions = []
-        # 检查周围的tile是否可行
-        # 可行的tile.name: "GROUND_TILE":3, "GROUND_TILE_PATH":28,"MOUNTAIN_TILE":30,"RAMP_TO_MOUNTAIN":31,"SNOWY_MOUNTAIN_TILE":32,"SNOWY_RAMP_TO_MOUNTAIN":36
-        actionable_tiles_id = [3, 28, 30, 31, 32, 36]
-        for neighbors_location in follower.location().neighbors():
-            # 检索该tile的名字，并判断是否在可行的tile中
-            neighbors_tile_id = mapu.get_tile_id(neighbors_location)
-            if neighbors_tile_id not in actionable_tiles_id:
-                continue
-            # 如果当前follower不在mountain类的tile上，那么只能选择GROUND_TILE和GROUND_TILE_PATH、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
-            if mapu.get_tile_id(follower.location()) in [3, 28]:
-                if neighbors_tile_id not in [3, 28, 31, 36]:
-                    continue
-            # 如果当前follower在mountain类的tile上，那么只能选择MOUNTAIN_TILE、SNOWY_MOUNTAIN_TILE、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
-            if mapu.get_tile_id(follower.location()) in [30, 32]:
-                if neighbors_tile_id not in [30, 32, 31, 36]:
-                    continue
-            # 如果当前follower在RAMP上，强制选择""forward, backward, forward"或者"backward, forward, backward"
-            if mapu.get_tile_id(follower.location()) in [31, 36]:
-                # 先不考虑ramp的朝向
-                atomic_instructions.append("forward, backward")
-                continue
-            degrees_away = follower.location().degrees_to(neighbors_location) - follower_orientation
-            if degrees_away < 0:
-                degrees_away += 360
-            if degrees_away > 180:
-                degrees_away -= 360
-            if degrees_away == 0:
-                atomic_instructions.append("forward, backward")
-            elif degrees_away == 60:
-                atomic_instructions.append("right, forward, backward")
-            elif degrees_away == 120:
-                atomic_instructions.append("left, backward, forward")
-                #atomic_instructions.append("right, right, forward, backward")
-            elif degrees_away == 180:
-                atomic_instructions.append("backward, forward")
-            elif degrees_away == -60:
-                atomic_instructions.append("left, forward, backward")
-            elif degrees_away == -120:
-                atomic_instructions.append("right, backward, forward")
-                #atomic_instructions.append("left, left, forward, backward")
-        return atomic_instructions[0] # 返回第一个可行的tile，的方式
-    # 2.卡片不在当前位置：直接去卡片的位置
-    else:
-        atomic_instruction = find_matching_tiles(description_atomic, card_location)
-        return atomic_instruction
 def deselect_card(mapu, description_atomic, follower, card_location):
     # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
     if "distance 0" in card_location:
