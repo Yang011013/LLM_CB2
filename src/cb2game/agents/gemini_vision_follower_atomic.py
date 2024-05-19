@@ -192,7 +192,7 @@ class GeminiVisionFollowerAtomic(Agent):
                                             model=self.model)
         if not response:
             self.game_history += ["model: Do nothing!"]
-            return Action.NoopAction()
+            return "", Action.NoopAction()
         else:
             response_text = response.text
             self.game_history += [f"{response_text}"]
@@ -216,7 +216,7 @@ class GeminiVisionFollowerAtomic(Agent):
         actions = actions_from_code(action_string, active_instruction.uuid)
 
         if len(actions) == 0:
-            return Action.NoopAction()
+            return "", Action.NoopAction()
         if self.queueing_enabled:
             self.action_queue = actions[1:]
             return response_text,actions[0]
