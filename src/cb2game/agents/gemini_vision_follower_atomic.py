@@ -135,15 +135,16 @@ class GeminiVisionFollowerAtomic(Agent):
 
     # OVERRIDES choose_action
     def choose_action(self, game_state: GameState, game=None, action_number=None, action_mask=None, test=False) -> Action:
+        # if instrs[-1].text != self.current_instruction and test:
+        #     self.action_queue = []
+        if len(self.action_queue) > 0 and self.queueing_enabled:
+            return "", self.action_queue.pop(0)
         # Fetch more actions.
         [mapu, props, turn_state, instrs, _, _] = game_state # 5.13这里返回是整个地图的mapu
         (leader, follower) = get_actors(game_state)
         follower_map_update = CensorFollowerMap(mapu, follower, self.server_config)
         # 测试的情况下
-        if instrs[-1].text != self.current_instruction and test:
-            self.action_queue = []
-        if len(self.action_queue) > 0 and self.queueing_enabled:
-            return "", self.action_queue.pop(0)
+
         follower_props = CensorFollowerProps(props, follower, self.server_config)
         prop_update = PropUpdate(follower_props)
 
@@ -153,16 +154,10 @@ class GeminiVisionFollowerAtomic(Agent):
             f.write(description)
         # 保存第一视角图片
         # game.visualization().visualize_follower_visibility(self.turn_number, action_number)
-        try:
-            game.visualization().visualize_follower_visibility(101, 101)
-            first_view_image_path = crop_non_white_square("follower_view/follower_visibility_101_101.png")
-            image_data = Path(first_view_image_path).read_bytes()
-            self.image_parts.append({"mime_type": "image/png", "data": image_data})
-        except Exception as e:
-            game.visualization().visualize_follower_visibility(0, 0)
-            first_view_image_path = crop_non_white_square("follower_view/follower_visibility_0_0.png")
-            image_data = Path(first_view_image_path).read_bytes()
-            self.image_parts.append({"mime_type": "image/png", "data": image_data})
+        game.visualization().visualize_follower_visibility(0, 0)
+        first_view_image_path = crop_non_white_square("follower_view/follower_visibility_0_0.png")
+        image_data = Path(first_view_image_path).read_bytes()
+        self.image_parts.append({"mime_type": "image/png", "data": image_data})
         if instrs[-1].text != self.current_instruction:
             print("=========================================================")
             print("instruction: ",instrs[-1].text)
@@ -175,6 +170,7 @@ class GeminiVisionFollowerAtomic(Agent):
             p3 = "Please provide your response:\n"
             prompt = [p1, self.image_parts[-1], p2, p3]
             self.current_instruction = instrs[-1].text
+            self.last_deferred_task = ""
             # 每得到一个新的指令重置记忆
             self.game_history = []
             self.turn_number += 1
@@ -210,7 +206,7 @@ class GeminiVisionFollowerAtomic(Agent):
         response_dict = json.loads(response_text)
         self.deferred_task = response_dict["Deferred Task"]
         # 如果LLM输出重复的deffered_task，返回done
-        if self.last_deferred_task == self.deferred_task:
+        if self.last_deferred_task == self.deferred_task and self.deferred_task != "NULL":
             self.last_deferred_task = ""
             action_string = "done"
         else:

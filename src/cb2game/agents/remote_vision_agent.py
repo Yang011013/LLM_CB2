@@ -57,7 +57,7 @@ def PlayRemoteGame(
         if pause_per_turn > 0:
             time.sleep(pause_per_turn)
 
-        _, action = agent.choose_action(game_state, game, action_number)
+        _, action = agent.choose_action(game_state, game)
         # logger.info(f"step({action})")
         game_state = game.step(action)
         # game_state = game.step(action)

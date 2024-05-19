@@ -53,6 +53,7 @@ def PlayRemoteGame(
         action = agent.choose_action(game_state, game.action_mask())
         logger.info(f"step({action})")
         game_state = game.step(action)
+    print("game over, score:", game_state.turn_state.score)
 
 
 def main(
@@ -65,7 +66,6 @@ def main(
     """Connects to a remote server from the command line and plays a game using the specified agent."""
     # Loads an agent based off of pyyaml configs.
     agent_config_data = ReadAgentConfigOrDie(agent_config_filepath)
-    print(agent_config_data)
     agent = LoadAgentFromConfig(agent_config_data)
     PlayRemoteGame(
         host,

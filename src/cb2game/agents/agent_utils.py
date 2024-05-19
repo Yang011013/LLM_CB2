@@ -87,7 +87,7 @@ def deselect_card(mapu, description_atomic, follower, card_location):
             if mapu.get_tile_id(follower.location()) in [30, 32]:
                 if neighbors_tile_id not in [30, 32, 31, 36]:
                     continue
-            # 如果当前follower在RAMP上，志强选择""forward, backward, forward"或者"backward, forward, backward"
+            # 如果当前follower在RAMP上，强制选择""forward, backward, forward"或者"backward, forward, backward"
             if mapu.get_tile_id(follower.location()) in [31, 36]:
                 # 先不考虑ramp的朝向
                 atomic_instructions.append("forward, backward")
@@ -116,6 +116,45 @@ def deselect_card(mapu, description_atomic, follower, card_location):
     else:
         atomic_instruction = find_matching_tiles(description_atomic, card_location)
         return atomic_instruction
+def deselect_card(mapu, description_atomic, follower, card_location):
+    # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
+    if "distance 0" in card_location:
+        # 还要考虑follower的朝向
+        follower_orientation = follower.heading_degrees() - 60
+        atomic_instructions = {0:"forward, backward", 180:"backward, forward", 60:"right, forward, backward", 120:"left, backward, forward", -120:"right, backward, forward", -60:"left, forward, backward"}
+        degrees_aways = []
+        # 检查周围的tile是否可行
+        # 可行的tile.name: "GROUND_TILE":3, "GROUND_TILE_PATH":28,"MOUNTAIN_TILE":30,"RAMP_TO_MOUNTAIN":31,"SNOWY_MOUNTAIN_TILE":32,"SNOWY_RAMP_TO_MOUNTAIN":36
+        actionable_tiles_id = [3, 28, 30, 31, 32, 36]
+        for neighbors_location in follower.location().neighbors():
+            # 检索该tile的名字，并判断是否在可行的tile中
+            neighbors_tile_id = mapu.get_tile_id(neighbors_location)
+            if neighbors_tile_id not in actionable_tiles_id:
+                continue
+            # 如果当前follower不在mountain类的tile上，那么只能选择GROUND_TILE和GROUND_TILE_PATH、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
+            if mapu.get_tile_id(follower.location()) in [3, 28]:
+                if neighbors_tile_id not in [3, 28, 31, 36]:
+                    continue
+            # 如果当前follower在mountain类的tile上，那么只能选择MOUNTAIN_TILE、SNOWY_MOUNTAIN_TILE、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
+            if mapu.get_tile_id(follower.location()) in [30, 32]:
+                if neighbors_tile_id not in [30, 32, 31, 36]:
+                    continue
+            # 如果当前follower在RAMP上，强制选择""forward, backward, forward"或者"backward, forward, backward"
+            if mapu.get_tile_id(follower.location()) in [31, 36]:
+                return "forward, backward"
+            degrees_away = follower.location().degrees_to(neighbors_location) - follower_orientation
+            if degrees_away < 0:
+                degrees_away += 360
+            if degrees_away > 180:
+                degrees_away -= 360
+            degrees_aways.append(degrees_away)
+        for key in atomic_instructions.keys():
+            if key in degrees_aways:
+                return atomic_instructions[key]
+    else:
+        atomic_instruction = find_matching_tiles(description_atomic, card_location)
+        return atomic_instruction
+
 
 def get_action_string(response_dict, mapu, prop_update, follower):
     """

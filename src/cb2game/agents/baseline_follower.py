@@ -21,7 +21,9 @@ from follower_bots.data_utils.pyclient_utils import (
     get_processed_states,
 )
 from follower_bots.models.model_utils import load_follower_model_for_corpora_eval
-
+# import os
+# os.environ['http_proxy'] = 'http://127.0.0.1:10792'
+# os.environ['https_proxy'] = 'http://127.0.0.1:10792'
 from cb2game.pyclient.game_endpoint import Action, Role
 from cb2game.pyclient.remote_client import RemoteClient
 # from py_client.game_endpoint import Action, Role
@@ -190,6 +192,7 @@ class BaselineFollower(Agent):
     def __init__(self, config: BaselineFollowerConfig) -> object:
         super().__init__()
         self.instructions_processed = set()
+        self.model_name = "baseline_follower"
         self.actions = []
         self.config = config
         self.model = load_follower_model_for_corpora_eval(self.config)
@@ -238,6 +241,14 @@ class BaselineFollower(Agent):
                     text_mask,
                     action_mask,
                 )
+                # print("states.shape: ", self.states.shape)
+                # print("actions.shape: ", self.actions.shape)
+                # print("timesteps.shape: ", self.timesteps.shape)
+                # print("proc_instruction.shape: ", proc_instruction.shape)
+                # print("pos_idx.shape: ", pos_idx.shape)
+                # print("attention_mask.shape: ", self.attention_mask.shape)
+                # print("text_mask.shape: ", text_mask.shape)
+                # print("action_mask.shape: ", action_mask.shape)
         else:
             action = ActionEnums["DONE"].value
         self.actions[:, -1] = action
@@ -252,12 +263,19 @@ class BaselineFollower(Agent):
         done_instruction = (
             game_action.action_code() == Action.ActionCode.INSTRUCTION_DONE
         )
+        terminated_instruction = raw_instruction.uuid != get_active_uuid(
+            instructions
+        )
         if done_instruction:
             self.states, self.actions, self.timesteps = [], [], []
             self.model.reset_past_output()
             self.total_timesteps = 0
 
-        # time_beyond_standard = max(0, inference_time - 0.15)
-        # sleep_time = max(0.1, gauss(0.7 - time_beyond_standard, 0.08))
-        # sleep(sleep_time)
+        if terminated_instruction:
+            self.states, self.actions, self.timesteps = [], [], []
+            self.model.reset_past_output()
+            self.total_timesteps = 0
+        time_beyond_standard = max(0, inference_time - 0.15)
+        sleep_time = max(0.1, gauss(0.7 - time_beyond_standard, 0.08))
+        sleep(sleep_time)
         return game_action
