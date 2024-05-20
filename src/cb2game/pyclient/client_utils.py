@@ -36,8 +36,6 @@ def crop_non_white_square(image_path):
 
     cropped_image = image.crop((left, upper, right, lower))
     cropped_image.save(image_path)
-    return image_path
-
 
 def DescribeBearingFromActor(location: HecsCoord, actor: Actor) -> str:
     """Returns a string describing the given location from the perspective of the given actor."""
@@ -239,7 +237,7 @@ def SystemPrompt() -> str:
     Move: Forward or Backward
 
     Type 3: Move to a Specific Location within the visible area of the map.  \n 
-    **Important Note:** The location should be extracted from the NEARBY TILES or FURTHER TILES part of the structured string provided. \n
+    **Important Note:** The location should be extracted from the NEARBY TILES or FURTHER TILES part of the structured string of your first-view map provided. \n
     Here are the situations where you need to move to a specific location: \n
     The leader instructs you to move to a specific location, you should provide the location based on your current view.  
     Or the leader asks you to find a card, but the card is not in your view, you should move to a new location based on the leaders instructions to find it. \n
@@ -248,7 +246,7 @@ def SystemPrompt() -> str:
     Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>
 
     Type 4: Interact with a Card at a Specific Location within the visible area of the map.  \n
-    **Important Note:** The location of the card should be extracted from the CARDS DESCRIPTION part of the structured string provided.\n
+    **Important Note:** The location of the card should be extracted from the CARDS DESCRIPTION part of the structured string  of your first-view map  provided.\n
     Here are the situations where you need to interact with a card: \n
     If the leader instructs you to pick a card, you should check whether the card is in your view. If it is, you can directly point out the card's location.
     If you are standing on a card, sometimes your leader would ask you to deselect it.To deselect a card, step away from it and then stand on it again. \n
@@ -301,12 +299,15 @@ def SystemPrompt() -> str:
     instruction from the leader: "get the card by the dark green tree" \n
     Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading 14 and distance 3.6: CARD", "Deferred Task": "NULL"} \n
 
-    instruction from the leader: "take five steps forward then turn around" \n
-    Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 5.0: GROUND_TILE_PATH", "Deferred Task": "turn around"} \n
-
     instruction from the leader: "walk 3 steps forward" \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 3.0: GROUND_TILE_PATH", "Deferred Task": "NULL"} \n
+    
+    instruction from the leader: "take seven steps forward"\n
+    Output: {{"Immediate Task": "Next Location: Tile at heading 0 and distance 3.0: GROUND_TILE_PATH", "Deferred Task": "Take four steps forward"} \n}
 
+    instruction from the leader: "take five steps forward then turn around" \n
+    Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 5.0: GROUND_TILE_PATH", "Deferred Task": "turn around"} \n
+    
     instruction from the leader: "select the card on distant right of you" \n
     Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 5.0: CARD", "Deferred Task": "NULL"} \n
     
@@ -333,16 +334,16 @@ def SystemPrompt() -> str:
     
     instruction from the leader: "backward"\n
     Output: {"Immediate Task": "Move: Backward", "Deferred Task": "NULL"}\n
+    
+    instruction from the leader: "walk to the end of the map"\n
+    Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 4.0: GROUND_TILE", "Deferred Task": "NULL"}\n
     """
     return system_prompt
 
 def DescribeMap(
     map_update: MapUpdate,
     prop_update: PropUpdate,
-    instructions: List[ObjectiveMessage],
-    turn_state: TurnState,
     follower: Actor,
-    leader: Actor = None,
 ) -> str:
     """Returns a string describing the given map."""
     header = f"MAP DIMENSIONS:\n\t{map_update.rows}x{map_update.cols} hexagon map with {len(prop_update.props)} props. \n"
@@ -425,14 +426,6 @@ def DescribeMap(
                 HecsCoord.from_offset(outpost.r, outpost.c), follower, map_update, cards
             )
             metadata_descriptions.append(f"Outpost at {location_description}.")
-
-    # If provided, and if visible, describe the leader.
-    if leader:
-        if CoordinateIsVisible(leader.location(), follower, fog_end):
-            leader_location = DescribeLocationFromActor(
-                leader.location(), follower, map_update, cards
-            )
-            metadata_descriptions.append(f"Leader at {leader_location}.")
 
     # Describe nearby tiles
     nearby_tiles = []
