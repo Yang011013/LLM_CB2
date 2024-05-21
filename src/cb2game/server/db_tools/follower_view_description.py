@@ -146,6 +146,7 @@ def CoordinateIsVisible(coord, follower_location, follower_orientation, fog_end)
     else:
         return left <= degrees_to or degrees_to <= right
 
+
 def CensorFollowerProps(props, follower_location, follower_orientation, config):
     """Removes all props which aren't visible to the follower.
     """
@@ -154,6 +155,7 @@ def CensorFollowerProps(props, follower_location, follower_orientation, config):
         if CoordinateIsVisible(prop.prop_info.location, follower_location, follower_orientation, config.fog_end):
             new_props.append(dataclasses.replace(prop))
     return new_props
+
 
 def find_path_to_card(location: HecsCoord, follower_location, follower_orientation, map, cards):
     start_location = follower_location
@@ -187,6 +189,8 @@ def find_path_to_card(location: HecsCoord, follower_location, follower_orientati
                 continue
             location_queue.append((neighbor, current_path + [neighbor]))
     return None
+
+
 def get_instruction_to_location(
     location: HecsCoord,
     follower_location,

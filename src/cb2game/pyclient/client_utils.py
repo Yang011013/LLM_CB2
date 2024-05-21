@@ -248,13 +248,13 @@ def SystemPrompt() -> str:
     Type 4: Interact with a Card at a Specific Location within the visible area of the map.  \n
     **Important Note:** The location of the card should be extracted from the CARDS DESCRIPTION part of the structured string  of your first-view map  provided.\n
     Here are the situations where you need to interact with a card: \n
-    If the leader instructs you to pick a card, you should check whether the card is in your view. If it is, you can directly point out the card's location.
+    If the leader instructs you to pick a card, you should check whether the card is in your view. If it is, you can directly point out the card's location. When needed, you can output the locations of multiple Cards in the Immediate Task.\n
     If you are standing on a card, sometimes your leader would ask you to deselect it.To deselect a card, step away from it and then stand on it again. \n
     Choose one of the interactions:
     - Select Card
     - Deselect Card
     Your output should be like: \n
-    Card Interaction: <interaction> at Tile at heading <angle> and distance <distance>: CARD
+    Card Interaction: ['<interaction> at Tile at heading <angle> and distance <distance>: CARD', '<interaction> at Tile at heading <angle> and distance <distance>: CARD', ...]
 
     # Definition and format Deferred Tasks: \n
     These are tasks that require a change in perspective, which becomes possible after completing the immediate tasks. Describe these tasks in natural language not more than 20 words. \n
@@ -275,7 +275,7 @@ def SystemPrompt() -> str:
     # Note:
     Provide your answer in JSON format with the following keys:Immediate Task, Deferred Task. Other formats are not accepted.
     Expected Output Format:
-    {"Immediate Task": Either a direction change (e.g., "Turn left/right/Around") or a move (e.g., "Forward/Backward") or a specific location (e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>") or a card interaction (e.g., "Card Interaction: Select/Deselect Card at Tile at heading <angle> and distance <distance>: CARD"),
+    {"Immediate Task": Either a direction change (e.g., "Turn left/right/Around") or a move (e.g., "Forward/Backward") or a specific location (e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>") or a card interaction (e.g., "Card Interaction: ['Select/Deselect Card at Tile at heading <angle> and distance <distance>: CARD']"),
     "Deferred Task": "NULL" or a consice description of the remaining instructions in no more then 20 words.}
     Again, you must not calculate the heading and distance to a certain position. You only need to search the structured first-view string and get the best fit "Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>" according to your structured first-view string, first-view PNG image and instructions.
     
@@ -285,19 +285,19 @@ def SystemPrompt() -> str:
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 4.0: GROUND_TILE", "Deferred Task": "Pick up the card near the tree."} \n
 
     instruction from the leader: "Get the card that you can see across from you right now; it will be on the right side of the lake"
-    Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 4.0: CARD", "Deferred Task": "NULL"} \n
+    Output: {"Immediate Task": "Card Interaction: ['Select Card at Tile at heading -60 and distance 4.0: CARD']", "Deferred Task": "NULL"} \n
 
     instruction from the leader: "Turn 180 degrees and get the card immediately in front of you" \n
     Output: {"Immediate Task": "Change Direction: Turn Around", "Deferred Task": "Get the card in front of you."} \n
 
     instruction from the leader: "unselect the card you are on" \n
-    Output: {"Immediate Task": "Card Interaction: Deselect Card at Tile at heading 0 and distance 0: CARD", "Deferred Task": "NULL"} \n
+    Output: {"Immediate Task": "Card Interaction: ['Deselect Card at Tile at heading 0 and distance 0: CARD']", "Deferred Task": "NULL"} \n
 
     instruction from the leader: "turn left twice and grab that card" \n
     Output: {"Immediate Task": "Change Direction: Turn Left", "Deferred Task": "Turn left again then grab the card nearest to you."} \n
 
     instruction from the leader: "get the card by the dark green tree" \n
-    Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading 14 and distance 3.6: CARD", "Deferred Task": "NULL"} \n
+    Output: {"Immediate Task": "Card Interaction: ['Select Card at Tile at heading 14 and distance 3.6: CARD']", "Deferred Task": "NULL"} \n
 
     instruction from the leader: "walk 3 steps forward" \n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 3.0: GROUND_TILE_PATH", "Deferred Task": "NULL"} \n
@@ -309,7 +309,7 @@ def SystemPrompt() -> str:
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 5.0: GROUND_TILE_PATH", "Deferred Task": "turn around"} \n
     
     instruction from the leader: "select the card on distant right of you" \n
-    Output: {"Immediate Task": "Card Interaction: Select Card at Tile at heading -60 and distance 5.0: CARD", "Deferred Task": "NULL"} \n
+    Output: {"Immediate Task": "Card Interaction: ['Select Card at Tile at heading -60 and distance 5.0: CARD']", "Deferred Task": "NULL"} \n
     
     instruction from the leader: "Pick up the card by the lake"\n
     Output: {"Immediate Task": "Next Location: Tile at heading 23 and distance 4.4: GROUND_TILE_PATH", "Deferred Task": "NULL"} \n
@@ -337,6 +337,19 @@ def SystemPrompt() -> str:
     
     instruction from the leader: "walk to the end of the map"\n
     Output: {"Immediate Task": "Next Location: Tile at heading 0 and distance 4.0: GROUND_TILE", "Deferred Task": "NULL"}\n
+    
+    instruction from the leader: "Grab the card to your left"\n
+    Output: {"Immediate Task": "Change Direction: Turn Left", "Deferred Task": "get the card"}\n
+    
+    instruction from the leader: "Turn left and go past the boulders and "\n
+    Output: {"Immediate Task": "Change Direction: Turn Left", "Deferred Task": "go past the stone then pick up the first card on your right"}
+    
+    instruction from the leader: "Pick up the two cards in sight"\n
+    Output:{'Immediate Task': "Card Interaction: ['Select Card at Tile at heading -60 and distance 1.0: CARD', 'Select Card at Tile at heading 14 and distance 3.6: CARD']", 'Deferred Task': 'NULL'}
+
+    instruction from the leader: "Pick up the card in front of you, then turn right to pick another card in your sight"\n
+    Output:{'Immediate Task': "Card Interaction: ['Select Card at Tile at heading 0 and distance 2.0: CARD']", 'Deferred Task': 'Turn right to pick another card in your sight'}
+
     """
     return system_prompt
 
@@ -359,6 +372,8 @@ def DescribeMap(
     # Describe the cards
     selected_card_descriptions = []
     unselected_card_descriptions = []
+    selected_distances = []
+    unselected_distances = []
     for prop in prop_update.props:
         if prop.prop_type == PropType.CARD:
             direction = (
@@ -375,13 +390,21 @@ def DescribeMap(
             distance = follower.location().distance_to(prop.prop_info.location)
             # Only show shape, color, count for selected cards.
             if prop.card_init.selected:
+                selected_distances.append(distance)
                 selected_card_descriptions.append(
                     f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD. Shape {prop.card_init.shape.name}, color {prop.card_init.color.name}, count {prop.card_init.count}"
                 )
             else:
+                unselected_distances.append(distance)
                 unselected_card_descriptions.append(
                     f"Tile at heading {direction:.0f} and distance {distance:.1f}: CARD"
                 )
+    sorted_indices1 = sorted(range(len(selected_distances)), key=lambda k: selected_distances[k])
+    selected_card_descriptions = [selected_card_descriptions[i] for i in sorted_indices1]
+
+    sorted_indices2 = sorted(range(len(unselected_distances)), key=lambda k: unselected_distances[k])
+    unselected_card_descriptions = [unselected_card_descriptions[i] for i in sorted_indices2]
+
     # Describe the map metadata
     metadata = map_update.metadata
     metadata_descriptions = []

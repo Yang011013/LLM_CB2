@@ -140,9 +140,11 @@ class GeminiVisionFollowerAtomic(Agent):
         # Fetch more actions.
         [mapu, props, turn_state, instrs, _, _] = game_state  # 5.13这里返回是整个地图的mapu
         active_instruction = get_active_instruction(instrs)
+        if active_instruction is None:
+            return "", Action.NoopAction()
         # testing model: when get new instruction, clear the actions queue
         if instrs[-1].text != self.current_instruction and test:
-            print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+            print("=============================================")
             self.action_queue = []
 
         if len(self.action_queue) > 0 and self.queueing_enabled:
@@ -194,9 +196,8 @@ class GeminiVisionFollowerAtomic(Agent):
                 break
             else:
                 self.last_format_err = format_check
-
-                self.game_history += format_check
-
+                format_error_prompt = f"Your last response:\n{response.text} with the following kind of error:\n{format_check}.\nPlease give another correct response:\n"
+                self.game_history += format_error_prompt
 
         self.deferred_task = response_dict["Deferred Task"]
         # if LLM keep response the same deferred task
