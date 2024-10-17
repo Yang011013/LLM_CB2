@@ -755,8 +755,10 @@ class GameDisplay(object):
 
     def visualize_follower_visibility(self, turn_number=0, action_number=0, file_path=None):
         if self._config is None:
+            print("No config found.")
             return
         if self._state_sync is None:
+            print("No state sync found.")
             return
         follower = None
         for i, actor in enumerate(self._state_sync.actors):
@@ -834,7 +836,7 @@ class GameDisplay(object):
         if file_path:
             pygame.image.save(self._screen, file_path)
             return
-        pygame.image.save(self._screen, f"follower_view/follower_visibility_{turn_number}_{action_number}.png")
+        # pygame.image.save(self._screen, f"follower_view/follower_visibility_{turn_number}_{action_number}.png")
 
     import math
 
@@ -895,7 +897,8 @@ class GameDisplay(object):
         self._screen = pygame.display.set_mode((screen_size, screen_size))
         pygame.display.set_caption("Game Visualizer")
         self._pygame_initialized = True
-
+    def save_screen(self, image_path):
+        pygame.image.save(self._screen, image_path)
     def draw(self):
         if not self._pygame_initialized:
             self.init_pygame()
@@ -908,7 +911,7 @@ class GameDisplay(object):
         self.visualize_trajectory()
         self.visualize_markers()
         self.visualize_follower_visibility()
-        # self.visualize_instructions()
+        self.visualize_instructions()
         self.visualize_selected_tile()
 
 

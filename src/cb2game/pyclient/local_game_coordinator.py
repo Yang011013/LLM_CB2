@@ -97,7 +97,7 @@ class LocalGameCoordinator:
     """
 
     def __init__(
-        self, config, render_leader: bool = False, render_follower: bool = False
+        self, config, render_leader: bool = True, render_follower: bool = True
     ):
         self._game_drivers = {}  # Game name -> StateMachineDriver
         self._game_endpoints = {}  # Game name -> (leader_endpoint, follower_endpoint)

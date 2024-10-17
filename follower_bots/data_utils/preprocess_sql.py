@@ -12,23 +12,23 @@ import peewee
 import torch
 
 import follower_bots.data_utils.data_classes as data_cls
-import cb2game.server.config.config as config
-import cb2game.server.db_tools.db_utils as db_utils
-import cb2game.server.messages.map_update as map_update_msg
-import cb2game.server.schemas.defaults
-import cb2game.server.schemas.game
+import src.cb2game.server.config.config as config
+import src.cb2game.server.db_tools.db_utils as db_utils
+import src.cb2game.server.messages.map_update as map_update_msg
+import src.cb2game.server.schemas.defaults
+import src.cb2game.server.schemas.game
 from follower_bots.constants import EDGE_WIDTH, ACT_DIM
 from follower_bots.utils import mkdir
 
-from cb2game.server.messages.prop import PropUpdate, PropType
-from cb2game.server.messages.action import Action
-from cb2game.server.actor import Actor
-from cb2game.server.card import Card
-from cb2game.server.hex import HecsCoord
-from cb2game.server.schemas.util import InitialState
-from cb2game.server.messages.objective import ObjectiveMessage
-from cb2game.server.schemas import base
-from cb2game.server.schemas.event import Event, EventType
+from src.cb2game.server.messages.prop import PropUpdate, PropType
+from src.cb2game.server.messages.action import Action
+from src.cb2game.server.actor import Actor
+from src.cb2game.server.card import Card
+from src.cb2game.server.hex import HecsCoord
+from src.cb2game.server.schemas.util import InitialState
+from src.cb2game.server.messages.objective import ObjectiveMessage
+from src.cb2game.server.schemas import base
+from src.cb2game.server.schemas.event import Event, EventType
 
 
 def get_args():
@@ -36,11 +36,9 @@ def get_args():
         description="Processes past experiments in a SQL database for future training"
     )
 
-    # parser.add_argument("--output_dir", type=str, default="./follower_bots/pretraining_data")
-    parser.add_argument("--output_dir", type=str, default="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data")
+    parser.add_argument("--output_dir", type=str, default="./follower_bots/pretraining_data")
     parser.add_argument(
-        # "--config_filepath", type=str, default="./follower_bots/data_configs/pretraining_examples.json"
-        "--config_filepath", type=str, default="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/data_configs/pretraining_examples.json"
+        "--config_filepath", type=str, default="./follower_bots/data_configs/pretraining_examples.json"
     )
 
     args = parser.parse_args()
@@ -56,7 +54,7 @@ def get_tr_val_games(cfg):
 
     split = (len(games) // 10) * 9
     train_games = games[:split]
-    val_games = games[split:]
+    val_games = games[:]
 
     print(
         f"Following added filtering, there are {len(train_games)} train games"
@@ -65,7 +63,7 @@ def get_tr_val_games(cfg):
 
     return train_games, val_games
 
-
+import glob
 def preprocess_games(args, games, output_dir, split_name):
     trajectories = []
 
@@ -86,9 +84,36 @@ def preprocess_games(args, games, output_dir, split_name):
         )
 
         # Iterate over each active instruction
-        instructions = game_events.where(Event.type == EventType.INSTRUCTION_SENT) # 事件，EventType: INSTRUCTION_SENT
+        instructions = game_events.where(Event.type == EventType.INSTRUCTION_SENT)
         instructions = instructions.order_by(Event.server_time)
+
+
+
+        skipped_num = 0
+        def load_json_files(directory_path='skipped_instructions'):
+            all_data = []
+            # 获取指定目录下所有 .json 文件的路径
+            json_files = glob.glob(f"{directory_path}/*.json")
+
+            for json_file in json_files:
+                with open(json_file, 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+                    all_data.extend(data)  # 将每个文件中的数据添加到all_data列表中
+
+            return all_data
+        skipped_instructions = load_json_files()
+        skipped_instructions_id = [skipped_instruction['uuid'] for skipped_instruction in skipped_instructions]
         for instruction in instructions:
+            objective = ObjectiveMessage.from_json(instruction.data)
+            if str(objective.uuid) in skipped_instructions_id:
+                skipped_num += 1
+                print("skip instruction:" + str(objective.uuid) + objective.text)
+                continue
+
+
+
+
+
             # First extract the instruction text
             instruction_activation = get_instruction_activation(instruction)
             if instruction_activation is None:
@@ -96,15 +121,13 @@ def preprocess_games(args, games, output_dir, split_name):
             text = ObjectiveMessage.from_json(instruction.data).text
 
             # Next extract the actions the follower took
-            actions, moves = get_actions(instruction) # actions--follower的动作列表，moves--follower的动作事件列表
+            actions, moves = get_actions(instruction)
 
             # Determine whether to skip the instruction
             if skip_instruction(instruction, actions, split_name):
                 continue
 
-            # game_events是一局游戏中的所有事件，
-            # Extract information about the static props on the game map
-            static_map, map = get_static_map_info(game_events) # static_map--一静态地图信息StaticMap类，map--地图信息json类
+            static_map, map = get_static_map_info(game_events)
             dynamic_maps = get_dynamic_map_info(game_events, instruction, actions, moves)
             final_follower_pos, change_grid, special_cards = get_swsd_information(
                 dynamic_maps, instruction, moves
@@ -113,12 +136,12 @@ def preprocess_games(args, games, output_dir, split_name):
 
             trajectories.append(
                 (
-                    text, # instruction text
-                    static_map, #一局游戏的 static map
-                    dynamic_maps, # 收集每个action之后的静态地图信息
+                    text,
+                    static_map,
+                    dynamic_maps,
                     actions,
                     game.id,
-                    instruction_activation.id,# 指令的ID
+                    instruction_activation.id,
                     final_follower_pos,
                     change_grid,
                     special_cards,
@@ -129,7 +152,7 @@ def preprocess_games(args, games, output_dir, split_name):
             num_instructions += 1
             if num_instructions % 150 == 0:
                 print(f"Instruction {num_instructions} in {split_name}")
-
+        print("skipped instructions:" + str(skipped_num))
     datapath = os.path.join(output_dir, f"pretrain_{split_name}.pkl")
     with open(datapath, "wb") as f:
         pickle.dump(trajectories, f)
@@ -192,8 +215,8 @@ def get_static_map_info(game_events):
     # Extract information about the static props on the game map
     map_events = game_events.select().where(Event.type == EventType.MAP_UPDATE)
     map_events = map_events.order_by(Event.server_time).get().data
-    map_update = map_update_msg.MapUpdate.from_json(map_events) # 包含地图信息的json类信息内容
-    return data_cls.StaticMap(map_update), map_update # StaticMap类
+    map_update = map_update_msg.MapUpdate.from_json(map_events)
+    return data_cls.StaticMap(map_update), map_update
 
 
 def get_dynamic_map_info(game_events, instruction, actions, moves):
@@ -202,7 +225,7 @@ def get_dynamic_map_info(game_events, instruction, actions, moves):
         if i < len(moves):
             dynamic_map = get_regular_dynamic_map(game_events, instruction, moves[i])
         else:
-            dynamic_map = get_done_dynamic_map(game_events, instruction) # actions完成后的地图
+            dynamic_map = get_done_dynamic_map(game_events, instruction)
 
         dynamic_maps.append(dynamic_map)
 
@@ -210,15 +233,15 @@ def get_dynamic_map_info(game_events, instruction, actions, moves):
 
 def get_regular_dynamic_map(game_events, instruction, move):
     # Extract follower information from the move
-    follower_location = move.location # 动作发生前follower的位置
-    follower_orientation = (move.orientation - 60) % 360 # 动作发生前follower的朝向
+    follower_location = move.location
+    follower_orientation = (move.orientation - 60) % 360
 
-    # Extract leader position before this move获取leader的位置和朝向
+    # Extract leader position before this move
     leader_location, leader_orientation = get_leader_coords(
         game_events, instruction, move
     )
 
-    # Get the cards on the map immediately before the follower moves，获取所有卡片的属性信息
+    # Get the cards on the map immediately before the follower moves
     cards = get_cards_before(game_events, instruction, move)
 
     dynamic_map = data_cls.DynamicMap(
@@ -332,25 +355,25 @@ def get_cards_before(game_events, instruction, move, done=False):
         card_events = game_events.where(Event.type << card_types,
                                         Event.server_time <= move.server_time)        
     else:
-        card_events = game_events.where(Event.type << card_types,#筛选game_event中Event.type列中值为card_types中任何值
-                                        Event.server_time < move.server_time)#表示选择在移动之前的事件
+        card_events = game_events.where(Event.type << card_types,
+                                        Event.server_time < move.server_time)
     card_events = card_events.order_by(Event.server_time)
 
     # Iterate over each card event
     props = []
     for event in card_events:
-        if event.type == EventType.CARD_SET: # A card set was collected. This increases score by one.
+        if event.type == EventType.CARD_SET:
             data = json.loads(event.data)
-            cards_ids = set([int(card_dict["id"]) for card_dict in data["cards"]]) # 从数据中提取卡片的ID
-            props = [prop for prop in props if prop.id not in cards_ids] # 移除已收集的卡片的属性信息。
-        elif event.type == EventType.CARD_SPAWN: # to just add one card to the current list of props.
+            cards_ids = set([int(card_dict["id"]) for card_dict in data["cards"]])
+            props = [prop for prop in props if prop.id not in cards_ids]
+        elif event.type == EventType.CARD_SPAWN:
             card = Card.from_json(event.data)
-            props.append(card.prop()) # 将新生成的卡片的属性信息添加到列表中
-        elif event.type == EventType.CARD_SELECT: # Information about a card which was just selected or unselected.
+            props.append(card.prop())
+        elif event.type == EventType.CARD_SELECT:
             card = Card.from_json(event.data)
             for prop in props:
                 if prop.id == card.id:
-                    prop.card_init.selected = card.selected # 更新匹配的属性的选择状态
+                    prop.card_init.selected = card.selected
                     break
         else:
             prop_update = PropUpdate.from_json(event.data)
@@ -532,7 +555,7 @@ def main():
     print(f"Reading database from {cfg.database_path()}")
     base.SetDatabase(cfg)
     base.ConnectDatabase()
-    # base.CreateTablesIfNotExists(server.schemas.defaults.ListDefaultTables())
+    base.CreateTablesIfNotExists(src.cb2game.server.schemas.defaults.ListDefaultTables())
 
     # Get train and val games
     train_games, val_games = get_tr_val_games(cfg)

@@ -21,7 +21,7 @@ from follower_bots.constants import (
 from follower_bots.data_utils.data_classes import ActionEnums
 from follower_bots.models.hex_conv import HexConv
 
-# This model uses GPT to model (text_1, ..., text_n, state_1, action_1, state_2, action_2, ...)
+
 class DecisionTransformer(nn.Module):
 
     """
@@ -167,12 +167,12 @@ class DecisionTransformer(nn.Module):
             torch.stack((state_embeddings, action_embeddings), dim=1)
             .permute(0, 2, 1, 3)
             .reshape(batch_size, 2 * seq_length, self.hidden_size)
-        ) # B x 2T x hidden
+        )
 
         # adds the text-conditioning to the front
         # new view is (T_1, T_2, T_3, ..., s_1, a_1, etc.)
-        stacked_inputs = torch.cat([text_embeddings, stacked_inputs], dim=1) # B x (T' + 2T) x hidden
-        stacked_inputs = self.embed_ln(stacked_inputs) # LayerNorm
+        stacked_inputs = torch.cat([text_embeddings, stacked_inputs], dim=1)
+        stacked_inputs = self.embed_ln(stacked_inputs)
 
         # to make the attention mask fit the stacked inputs, have to stack it as well
         stacked_attention_mask = (

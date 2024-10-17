@@ -6,7 +6,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 logger = logging.getLogger(__name__)
 
 # database = SqliteExtDatabase(None)
-database = SqliteExtDatabase("C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data/cb2-data-base/human_model/game_data.db")
+database = SqliteExtDatabase("C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data/cb2-data-base/train/game_data.db")
 
 class BaseModel(Model):
     class Meta:

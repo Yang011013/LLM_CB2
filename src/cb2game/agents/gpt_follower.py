@@ -1,3 +1,11 @@
+from typing import Union, Tuple, Any
+from dataclasses import dataclass
+from mashumaro.mixins.json import DataClassJSONMixin
+from openai import OpenAI
+import httpx
+class Config():
+    fog_end = 20
+
 import concurrent.futures
 import functools
 import logging
@@ -10,7 +18,7 @@ from mashumaro.mixins.json import DataClassJSONMixin
 
 from cb2game.agents.agent import Agent, RateLimitException, Role
 from cb2game.pyclient.client_utils import (
-    DescribeMap,
+    OriginDescribeMap,
     FollowerSystemPrompt,
     SingleActionSystemPrompt,
 )
@@ -22,46 +30,44 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GptFollowerConfig(DataClassJSONMixin):
-    """Configuration for initializing a GPTFollower agent.
-
-    For help choosing a value for `model`, see:
-        https://platform.openai.com/docs/models/overview
-    To get an API key, see:
-        https://platform.openai.com/account/api-keys
-    """
-
     gpt_api_key: str
-    queueing_enabled: bool = False
-    model: str = "gpt-3.5-turbo"
-    maximum_tokens: int = (
-        3900  # Model maximum of 4097. Completion consumes some tokens too though.
+    model: str
+    max_output_tokens: int = (
+        4096
     )
+    max_in_tokens: int = 30000
+    temperature: float = 0.4
+    top_p: int = 1
+    top_k: int = 32
+    queueing_enabled: bool = True
+    safety_settings: list = None
+
 
 
 class GptFollower(Agent):
     def __init__(self, config: GptFollowerConfig):
         self.queueing_enabled = config.queueing_enabled
-        self.gpt_api_key = config.gpt_api_key
-        self.max_tokens = config.maximum_tokens
-        openai.api_key = self.gpt_api_key
-        self.model = config.model
-        game_explanation = (
+        self.max_tokens = config.max_output_tokens
+        self.model_name = config.model
+        self.game_explanation = (
             FollowerSystemPrompt()
             if self.queueing_enabled
             else SingleActionSystemPrompt()
         )
         self.game_history = [
-            {"role": "system", "content": game_explanation},
+            {"role": "system", "content": self.game_explanation},
         ]
+        self.client = OpenAI(api_key=config.gpt_api_key)
         self.action_queue = []
         self.thought_queue = []
+        self.last_instruction = None
 
     # OVERRIDES role
     def role(self) -> Role:
         return Role.FOLLOWER
 
     def _count_tokens(self, text: str):
-        enc = tiktoken.encoding_for_model("gpt-4")
+        enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
         return len(enc.encode(text))
 
     def _can_message_fit(self, text: str):
@@ -79,10 +85,6 @@ class GptFollower(Agent):
 
     # OVERRIDES choose_action
     def choose_action(self, game_state: GameState, action_mask=None) -> Action:
-        # 保存此时follower视角的RGB图像：=====================
-
-
-
         """Chooses an action to take, given a game state.
 
         If queueing_enabled is true in the constructor, one prompt can
@@ -95,15 +97,21 @@ class GptFollower(Agent):
         If queueing is not enabled, each prompt returns one instruction.
         """
         if len(self.action_queue) > 0 and self.queueing_enabled:
-            return self.action_queue.pop(0)
+            return "", self.action_queue.pop(0)
         # Fetch more actions.
-        [mapu, props, turn_state, instrs, _, _] = game_state
+        try:
+            mapu, props, turn_state, instrs, actors, _, _ = game_state
+        except:
+            mapu, props, turn_state, instrs, actors, _ = game_state
+        (leader, follower) = (None, actors[0]) if len(actors) == 1 else actors
+        if self.last_instruction != instrs[-1].uuid:
+            self.last_instruction = instrs[-1].uuid
+            self.game_history = [{"role": "system", "content": self.game_explanation},]
+
         prop_update = PropUpdate(props)
-        (leader, follower) = get_actors(game_state)
-        description = DescribeMap(
+        description = OriginDescribeMap(
             mapu, prop_update, instrs, turn_state, follower, leader
         )
-
         # If the message can't fit, prune old non-system messages, then see if it can fit.
         while not self._can_message_fit(description):
             if not self._prune_oldest_messages(description):
@@ -116,15 +124,13 @@ class GptFollower(Agent):
             }
         )
 
-        try:
-            response = call_openai_api_sync(
-                messages=self.game_history, model=self.model
-            )
-        except openai.error.RateLimitError as e:
-            raise RateLimitException(f"OpenAI API rate limit exceeded: {e}")
+        response = call_openai_api_sync(
+            messages=self.game_history, client=self.client, model=self.model_name,
+        )
+
 
         if not response:
-            return Action.NoopAction()
+            return "", Action.NoopAction()
 
         response_text = response.choices[0].message.content.strip()
         action_string = ""
@@ -152,16 +158,17 @@ class GptFollower(Agent):
                 "content": response_text,
             }
         )
+        print(response_text)
         active_instruction = get_active_instruction(instrs)
         actions = actions_from_code(action_string, active_instruction.uuid)
         if len(actions) == 0:
-            return Action.NoopAction()
+            return "", Action.NoopAction()
 
         if self.queueing_enabled:
             self.action_queue = actions[1:]
-            return actions[0]
+            return "", actions[0]
 
-        return actions[0]
+        return "", actions[0]
 
 
 def timeout_decorator(timeout):
@@ -181,14 +188,11 @@ def timeout_decorator(timeout):
 
 
 @timeout_decorator(timeout=20)
-def call_openai_api_sync(messages, model="gpt-3.5-turbo"):
+def call_openai_api_sync(messages, client, model="gpt-3.5-turbo"):
     """Calls OpenAI API synchronously with a timeout. Some other values for model parameter:"""
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
-        messages=messages,
-        max_tokens=50,
-        n=1,
-        temperature=0.5,
+        messages=messages
     )
     return response
 

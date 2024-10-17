@@ -77,6 +77,7 @@ class HecsCoord(DataClassJSONMixin):
 
     def degrees_to(self, other):
         """Returns which direction (in degrees, nearest div of 60) to go from this Hecs coordinate to another Hecs coordinate."""
+        # 返回从c点到oc点向量与x轴正方向的夹角，范围是[-180, 180]
         c = self.cartesian()
         oc = other.cartesian()
         diff = (oc[0] - c[0], oc[1] - c[1])

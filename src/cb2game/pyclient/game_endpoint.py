@@ -436,7 +436,7 @@ class GameEndpoint(object):
         self,
         game_socket: GameSocket,
         config: Config,
-        render=False,
+        render=True,
         lobby_info: LobbyInfo = None,
     ):
         self.socket = game_socket
@@ -809,8 +809,8 @@ class GameEndpoint(object):
                 ]:
                     logger.debug(f"Init DONE for {self._player_role}")
                     self._initial_state_ready = True
-                    # if self.render:
-                    #     self._render()
+                    if self.render:
+                        self._render()
                     return True, ""
                 else:
                     logger.warning(
@@ -938,8 +938,8 @@ class GameEndpoint(object):
         else:
             leader,follower = actors
 
-        map_update = CensorFollowerMap(map_update, follower, self.config)
-        props = CensorFollowerProps(props, follower, self.config)
+        # map_update = CensorFollowerMap(map_update, follower, self.config)
+        # props = CensorFollowerProps(props, follower, self.config)
         actor_states = [a.state() for a in actors]
         self.display.set_state_sync(
             state_sync.StateSync(

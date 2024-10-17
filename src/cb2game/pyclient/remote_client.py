@@ -8,6 +8,7 @@ import aiohttp
 import nest_asyncio
 import orjson
 import requests
+print(requests.__version__)
 
 import cb2game.server.messages as messages
 from cb2game.pyclient.client_messages import (
@@ -77,7 +78,7 @@ class RemoteClient(object):
         ERROR = 8
         MAX = 9
 
-    def __init__(self, url, render=False, lobby_name="bot-sandbox"):
+    def __init__(self, url, render=True, lobby_name="bot-sandbox"):
         """Constructor.
 
         Args:
@@ -115,12 +116,36 @@ class RemoteClient(object):
         if self.init_state != RemoteClient.State.BEGIN:
             return False, "Server is not in the BEGIN state. Call Reset() first?"
         config_url = f"{self.url}/data/config"
-        config_response = requests.get(config_url)
+        proxies = {
+            "http": None,
+            "https": None,
+        }  # 明确设置绕过代理
+
+        try:
+            # 设置超时时间为10秒
+            config_response = requests.get(config_url, proxies=proxies, timeout=10)
+
+            # 检查状态码
+            if config_response.status_code == 200:
+                # 打印响应头
+                print("Response Headers:", config_response.headers)
+
+                # 打印响应体（如果内容较大，可以只打印前几行）
+                print("Response Content:", config_response.text[:500])
+            else:
+                print(f"Unexpected status code: {config_response.status_code}")
+        except requests.exceptions.Timeout:
+            print("Request timed out")
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+       # config_response = requests.get(config_url)
+
         if config_response.status_code != 200:
             return (
                 False,
                 f"Could not get config from {config_url}: {config_response.status_code}",
             )
+       
         self.config = Config.from_json(config_response.text)
         url = f"{self.url}/player_endpoint?is_bot=true"
         if self.lobby_name != "":

@@ -12,8 +12,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 torch.multiprocessing.set_sharing_strategy("file_system")
 
-import sys
-sys.path.append("C:/Users/keyang/Desktop/yan0/Agent/cb2")
 import follower_bots.constants as const
 from follower_bots.data_utils.pyclient_utils import initialize_coordinator
 from follower_bots.data_utils.sql_dataset import get_leader_actions, get_sql_dataloader
@@ -142,9 +140,10 @@ def get_args():
         default="follower_pretrain",
         help="Name for the experiment folder",
     )
-    parser.add_argument("--pretrain_dset_path", type=str, default="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data")
+
+    parser.add_argument("--pretrain_dset_path", type=str, default="./follower_bots/pretraining_data")
     parser.add_argument(
-        "--config_filepath", default="C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/data_configs/pretraining_examples.json"
+        "--config_filepath", default="./follower_bots/data_configs/pretraining_examples.json"
     )
 
     parser.add_argument(

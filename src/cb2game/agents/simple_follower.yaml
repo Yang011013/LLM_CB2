@@ -1,5 +1,0 @@
-name: "Simple Follower"
-comment: "Used for testing purposes mainly."
-agent_type: "SIMPLE_FOLLOWER" # agent_type
-config: # simple_follower_config
-  default_action: "INSTRUCTION_DONE"

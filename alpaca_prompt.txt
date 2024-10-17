@@ -1,0 +1,70 @@
+Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+        ### Instruction:
+        
+You would be provided with a instrction and an structured string to describe your first-view map.
+Your task is to break down the original instruction into two categories based on the map:
+1. Immediate Tasks: Tasks that are achievable within your current perspective and can be completed promptly. Type 1: Change Direction (e.g., "Turn left/right/Around") Type 2: Move to a specific location in the first-view map(e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>"). Type 3: Interact with a Card at a Specific Location within the visible area of the map.
+2. Deferred Tasks: Tasks that necessitate a change in perspective or additional insights to be accomplished. If there are no deferred tasks, record the output as "NULL".
+
+Provide your answer in JSON format with the following keys:Immediate Task, Deferred Task. Other formats are not accepted.
+Expected Output Format:
+{"Immediate Task": Either a direction change (e.g., "Turn left/right/Around") or a specific location (e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>","Card Interaction:   <interaction>  at Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>"),
+"Deferred Task": "NULL" or a consice description of the remaining instructions in no more then 20 words.}
+
+
+
+        ### Input:
+        Instruction: Turn around behind you pick up two cards next to a pond, 
+First-view Map:MAP DIMENSIONS: MAP DIMENSIONS:
+	25x25 hexagon map with 0 props. 
+CARDS DESCRIPTIONS
+	SELECTED CARDS:
+		
+	UNSELECTED CARDS:
+		
+MAP DESCRIPTION
+	Outpost at Path not in sight. distance: 4.4 units and heading: 336.6 degrees.
+NEARBY TILES
+	Left Tile: Tile at heading 60 and distance 1.0: GROUND_TILE_HOUSE_RED
+	Right Tile: Tile at heading -60 and distance 1.0: GROUND_TILE_PATH
+	Forward Tile: Tile at heading 0 and distance 1.0: GROUND_TILE_PATH
+FURTHER TILES
+	Tile at heading 0 and distance 2.0: GROUND_TILE_HOUSE_BLUE
+	Tile at heading -30 and distance 1.7: GROUND_TILE_HOUSE_RED
+	Tile at heading 30 and distance 1.7: GROUND_TILE_PATH
+	Tile at heading 0 and distance 3.0: GROUND_TILE
+	Tile at heading -19 and distance 2.6: GROUND_TILE
+	Tile at heading 19 and distance 2.6: GROUND_TILE_PATH
+	Tile at heading -41 and distance 2.6: GROUND_TILE
+	Tile at heading 41 and distance 2.6: GROUND_TILE
+	Tile at heading 0 and distance 4.0: GROUND_TILE
+	Tile at heading -14 and distance 3.6: GROUND_TILE
+	Tile at heading 14 and distance 3.6: GROUND_TILE_PATH
+	Tile at heading -30 and distance 3.5: GROUND_TILE
+	Tile at heading 30 and distance 3.5: GROUND_TILE_HOUSE_RED
+	Tile at heading -46 and distance 3.6: GROUND_TILE_TREE_SOLIDBROWN
+	Tile at heading 46 and distance 3.6: GROUND_TILE
+	Tile at heading 0 and distance 5.0: GROUND_TILE_PATH
+	Tile at heading -11 and distance 4.6: GROUND_TILE
+	Tile at heading 11 and distance 4.6: GROUND_TILE_PATH
+	Tile at heading -23 and distance 4.4: GROUND_TILE
+	Tile at heading 23 and distance 4.4: GROUND_TILE_STONES_GREENBUSH
+	Tile at heading -37 and distance 4.4: GROUND_TILE
+	Tile at heading 37 and distance 4.4: GROUND_TILE
+	Tile at heading 0 and distance 6.0: GROUND_TILE_STONES_GREENBUSH
+	Tile at heading -9 and distance 5.6: GROUND_TILE_PATH
+	Tile at heading 9 and distance 5.6: GROUND_TILE
+	Tile at heading -19 and distance 5.3: GROUND_TILE
+	Tile at heading 19 and distance 5.3: GROUND_TILE
+	Tile at heading -30 and distance 5.2: GROUND_TILE
+	Tile at heading 30 and distance 5.2: GROUND_TILE
+	Tile at heading -41 and distance 5.3: GROUND_TILE
+	Tile at heading 41 and distance 5.3: GROUND_TILE
+	Tile at heading -16 and distance 6.2: GROUND_TILE_PATH
+	Tile at heading -25 and distance 6.1: GROUND_TILE_HOUSE_TRIPLE_BLUE
+	Tile at heading -35 and distance 6.1: GROUND_TILE_HOUSE_BLUE
+	Tile at heading -44 and distance 6.2: GROUND_TILE_PATH
+
+        ### Response:
+        

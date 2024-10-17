@@ -39,16 +39,16 @@ def get_args():
     )
 
     # Model loading arguments
-    parser.add_argument(
-        "--experiments_folder",
-        type=str,
-        help="The folder in which the desired experiment is held",
-    )
-    parser.add_argument(
-        "--experiments_name",
-        type=str,
-        help="The name of the experiment from which to load a model",
-    )
+    # parser.add_argument(
+    #     "--experiments_folder",
+    #     type=str,
+    #     help="The folder in which the desired experiment is held",
+    # )
+    # parser.add_argument(
+    #     "--experiments_name",
+    #     type=str,
+    #     help="The name of the experiment from which to load a model",
+    # )
     parser.add_argument(
         "--sampling_strat",
         type=str,
@@ -80,9 +80,15 @@ def get_args():
     # Dataset arguments
     parser.add_argument("--batch_size", type=int, default=const.BATCH_SIZE)
     parser.add_argument("--num_workers", type=int, default=const.NUM_WORKERS)
-    parser.add_argument("--pretrain_dset_path", default="./follower_bots/pretraining_data")
+    parser.add_argument("--pretrain_dset_path", default="follower_bots/pretraining_data/cb2-data-base/human_human")
     parser.add_argument(
-        "--config_filepath", default="./follower_bots/data_configs/pretraining_examples.json"
+        "--config_filepath", default="follower_bots/pretraining_data/cb2-data-base/config/human_human.yaml"
+    )
+    parser.add_argument(
+        "--experiments_folder", type=str, default="follower_bots/experiments/pretraining/deployment_models",
+    )
+    parser.add_argument(
+        "--experiments_name", type=str, default="run_3",
     )
 
     args = parser.parse_args()

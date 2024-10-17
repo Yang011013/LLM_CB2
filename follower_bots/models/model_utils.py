@@ -3,22 +3,14 @@
 # Contain utilities for models, such as loading and saving models
 
 import os
-import collections
 
 import torch
 
 from follower_bots.constants import TORCH_DEVICE
-import follower_bots.constants as const
 from follower_bots.models.ensembled_models import FollowerEnsemble
 from follower_bots.models.follower_transformers import DecisionTransformer
 from follower_bots.utils import load_arguments
 
-class Config:
-    def __init__(self, args):
-        self.experiments_folder = args["experiments_folder"]  # "follower_bots/experiments/pretraining/deployment_models"
-        self.experiments_name = args["experiments_name"]
-        self.use_ensembling = args["use_ensembling"]
-        self.sampling_strat = const.SAMPLING_STRAT
 
 def save_checkpoints(
     follower,
@@ -96,7 +88,7 @@ def get_follower_model(args):
 
     return follower
 
-
+import collections
 def load_follower_model(args, args_dir, model_dir, load_best=True):
     model_args = load_arguments(args_dir)
     follower = DecisionTransformer(
@@ -161,17 +153,14 @@ def load_follower_model_for_corpora_eval_ensembled(args):
 
 
 def load_follower_model_for_corpora_eval_standard(args):
-    # args_dir = os.path.join(args.experiments_folder, args.experiments_name, "logging")
-    # model_dir = os.path.join(
-    #     args.experiments_folder, args.experiments_name, "checkpoints"
-    # )
-    args_dir = f"{args.experiments_folder}/{args.experiments_name}/logging"
-    model_dir = f"{args.experiments_folder}/{args.experiments_name}/checkpoints"
+    args_dir = os.path.join(args.experiments_folder, args.experiments_name, "logging")
+    model_dir = os.path.join(
+        args.experiments_folder, args.experiments_name, "checkpoints"
+    )
     follower, _, _ = load_follower_model(args, args_dir, model_dir, load_best=True)
     return follower
 
 def load_follower_model_for_corpora_eval(args):
-    args = Config(args)
     "ensembled" if args.use_ensembling else "normal"
     if args.use_ensembling:
         return load_follower_model_for_corpora_eval_ensembled(args)

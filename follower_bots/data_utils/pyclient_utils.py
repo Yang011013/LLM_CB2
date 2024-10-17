@@ -10,7 +10,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from transformers import GPT2Tokenizer
 
-import cb2game.server.db_tools.db_utils as db_utils
+import src.cb2game.server.db_tools.db_utils as db_utils
 from follower_bots.constants import (
     ACT_DIM,
     EDGE_WIDTH,
@@ -27,13 +27,10 @@ from follower_bots.data_utils.data_classes import (
 from follower_bots.models.hex_conv import HexCrop
 from follower_bots.models.hex_util import AxialTranslatorRotator, OffsetToAxialConverter
 from follower_bots.models.pose import Pose
-from cb2game.pyclient import endpoint_pair as EndpointPair
-from cb2game.pyclient.game_endpoint import Action, Role
-from cb2game.pyclient.local_game_coordinator import LocalGameCoordinator
-# from py_client.endpoint_pair import EndpointPair
-# from py_client.game_endpoint import Action, Role
-# from py_client.local_game_coordinator import LocalGameCoordinator
-from cb2game.server.config.config import ReadConfigOrDie
+from src.cb2game.pyclient.endpoint_pair import EndpointPair
+from src.cb2game.pyclient.game_endpoint import Action, Role
+from src.cb2game.pyclient.local_game_coordinator import LocalGameCoordinator
+from src.cb2game.server.config.config import ReadConfigOrDie
 
 # FOLLOWER UTILITIES #
 

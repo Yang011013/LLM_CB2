@@ -4,7 +4,7 @@
 
 from enum import Enum
 
-from cb2game.server.assets import AssetId
+from src.cb2game.server.assets import AssetId
 
 
 class ActionEnums(Enum):
@@ -174,7 +174,6 @@ asset_to_properties = {
         MapProperty["HOUSE_TRIPLE"],
         MapProperty["HOUSE_COLOR_BLUE"],
     ],
-
     # Miscellaneous props
     AssetId.GROUND_TILE_STREETLIGHT.value: [MapProperty["STREETLIGHT"]],
     AssetId.GROUND_TILE_PATH.value: [MapProperty["PATH"]],
@@ -196,7 +195,6 @@ asset_to_properties = {
     ],
     AssetId.SNOWY_MOUNTAIN_TILE.value: [MapProperty["MOUNTAIN"], MapProperty["SNOW"]],
     AssetId.SNOWY_RAMP_TO_MOUNTAIN.value: [MapProperty["RAMP"], MapProperty["SNOW"]],
-
     AssetId.MOUNTAIN_TILE_TREE.value: [
         MapProperty["TREES"],
         MapProperty["TREE_DEFAULT"],
@@ -206,11 +204,6 @@ asset_to_properties = {
         MapProperty["TREE_DEFAULT"],
         MapProperty["SNOW"],
     ],
-    AssetId.GROUND_TILE_STREETLIGHT_FOILAGE.value: [MapProperty["STREETLIGHT"]],
-    AssetId.STREETLIGHT_BIG.value: [MapProperty["STREETLIGHT"]],
-    AssetId.STREETLIGHT_BUSHES.value: [MapProperty["STREETLIGHT"]],
-    AssetId.STREETLIGHT_ROCKS.value: [MapProperty["STREETLIGHT"]],
-    AssetId.STREETLIGHT_WIDE.value: [MapProperty["STREETLIGHT"]],
 }
 
 
@@ -285,7 +278,6 @@ class StaticMap:
             # Extract offset coordinates of tile
             offset_coord = tile.cell.coord.to_offset_coordinates()[::-1]
             properties = self.get_property_list(tile)
-            # 字典，将坐标与地图上的Basic properties和Asset对应，一个坐标对应有Basic properties和Asset
             self.coord_to_props[offset_coord] = properties
 
     def get_property_list(self, tile):
@@ -298,9 +290,6 @@ class StaticMap:
 
         # Asset id processing
         asset_id = tile.asset_id
-        print(asset_to_properties.keys())
-        print("===============")
-        print(asset_to_properties.values())
         asset_props = asset_to_properties[asset_id]
         props.extend(asset_props)
 
@@ -315,18 +304,10 @@ class DynamicMap:
     """
 
     def __init__(self, cards, f_loc, f_ang, l_loc=None, l_ang=None):
-        """
-        Args:
-            cards: cards是当前指令下，移动还没发生前的所有卡片的信息
-            f_loc: 动作发生前follower的位置
-            f_ang: 动作发生前follower的角度
-            l_loc: 动作发生前leader的位置
-            l_ang: 动作发生前leader的角度
-        """
         self.coord_to_props = {}
 
         self.add_agent(f_loc, f_ang, "FOLLOWER")
-        self.unpack_cards(cards)# 当前指令下，移动还没发生前的所有卡片的信息
+        self.unpack_cards(cards)
         self.add_agent(l_loc, l_ang, "LEADER")
 
     def get_follower_loc(self):
@@ -369,13 +350,13 @@ class DynamicMap:
 
     def unpack_cards(self, cards):
         for card in cards:
-            props = [DynamicProperty["CARD"]] # CARD = 40
-            card_coord = card.prop_info.location.to_offset_coordinates()[::-1] # 坐标
+            props = [DynamicProperty["CARD"]]
+            card_coord = card.prop_info.location.to_offset_coordinates()[::-1]
 
             if card_coord in self.coord_to_props:
                 # If position occupied by the follower, add limited information
                 selectedness = "SELECTED" if card.card_init.selected else "UNSELECTED"
-                props.append(DynamicProperty[selectedness]) # 指示该卡片是否被选择
+                props.append(DynamicProperty[selectedness])
                 self.coord_to_props[card_coord].extend(props)
             elif not card.card_init.selected:
                 props.append(DynamicProperty["UNSELECTED"])
@@ -395,4 +376,4 @@ class DynamicMap:
                 count = card.card_init.count
                 props.append(DynamicProperty[f"COUNT_{count}"])
 
-                self.coord_to_props[card_coord] = props # ["CARD"=40,"UNSELECTED"=43 or "SELECTED"=44,shape,color,count]
+                self.coord_to_props[card_coord] = props

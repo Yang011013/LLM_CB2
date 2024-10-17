@@ -23,7 +23,7 @@ from cb2game.server.messages.action import Action
 from cb2game.server.messages.objective import ObjectiveMessage
 from cb2game.server.schemas import base
 from cb2game.server.schemas.event import Event, EventType
-from cb2game.pyclient.client_utils import crop_non_white_square, DescribeMap
+from cb2game.pyclient.client_utils import DescribeMap
 from cb2game.server.map_utils import AssetId, NatureAssetIds, TreeAssetIds
 from cb2game.server.messages.prop import PropType, PropUpdate
 from collections import deque
@@ -466,8 +466,6 @@ def draw_follower_view(
             with open(description_filename, "w") as file:
                 file.write(map_description)
 
-        # crop_non_white_square(filename)
-        # break
 
 def main(
     max_instructions=-1,

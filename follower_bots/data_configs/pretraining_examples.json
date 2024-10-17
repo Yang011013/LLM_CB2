@@ -1,8 +1,8 @@
 {
-    "name": "Games with bot deployed.",
-    "comment": "This is a data analysis config. It contains the human-model games collected during deployment.",
-    "data_prefix": "C:/Users/keyang/Desktop/yan0/Agent/cb2/follower_bots/pretraining_data",
-    "analysis_game_id_ranges": [[266, 266], [268, 268], [279, 279], [282, 282], [314, 314], [324, 325], [340, 341], [400, 401], [411, 412], [426, 427], [429, 429], [454, 457], [459, 460], [496, 496], [499, 502], [506, 507], [509, 510], [522, 523], [525, 526], [528, 528], [530, 530], [533, 537], [540, 541], [544, 544], [546, 546], [549, 549], [551, 552], [554, 555], [557, 562], [564, 565], [567, 570], [574, 575], [577, 588], [591, 594], [596, 596], [598, 599], [607, 611], [613, 613], [615, 617], [647, 652], [654, 661], [663, 665], [667, 669], [671, 678], [680, 683], [685, 689], [691, 698], [700, 709], [713, 716], [719, 721], [723, 724], [726, 727], [731, 731], [737, 737], [742, 742], [744, 748], [751, 771]],
+    "name": "Demonstration training config",
+    "comment": "This is a data analysis config. It contains the games used for training the model.",
+    "data_prefix": "./follower_bots/pretraining_data",
+    "analysis_game_id_ranges": [[2134, 2137], [2139, 2139], [2141, 2141], [2144, 2144], [2153, 2155], [2157, 2157], [2159, 2160], [2163, 2166], [2168, 2168], [2170, 2170], [2172, 2173], [2175, 2175], [2177, 2183], [2185, 2193], [2195, 2199], [2218, 2222], [2224, 2234], [2237, 2257], [2259, 2283], [2286, 2292], [2294, 2308], [2310, 2310], [2312, 2312], [2314, 2319], [2321, 2324], [2326, 2345], [2347, 2350], [2352, 2358], [2360, 2372], [2374, 2375]],
     "map_cache_size": 0,
     "card_covers": true,
     "fog_start": 13,
@@ -10,11 +10,11 @@
     "fps_limit": 30,
     "live_feedback_enabled": true,
     "sqlite_pragmas": [
-        ['cache_size', -1048576], // 1MB cache size. Negative implies kibibyte units.
-        ['journal_mode', 'wal'],  // Use WAL-mode
-        ['synchronous', 'off'],  // Use normal sync mode.
-        ['temp_store', 'memory'],  // Use memory for temp storage.
-        ['mmap_size', '30000000000'], // 30GB mmap size.
+        ['cache_size', -1048576], # 1MB cache size. Negative implies kibibyte units.
+        ['journal_mode', 'wal'],  # Use WAL-mode
+        ['synchronous', 'off'],  # Use normal sync mode.
+        ['temp_store', 'memory'],  # Use memory for temp storage.
+        ['mmap_size', '30000000000'], # 30GB mmap size.
         ['foreign_keys', 1],
     ],
     "google_oauth_client_id": "787231947800-ee2g4lptmfa0av2qb26n1qu60hf5j2fd.apps.googleusercontent.com"

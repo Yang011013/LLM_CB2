@@ -43,7 +43,7 @@ class SQLDataset(Dataset):
     def __init__(
         self,
         dataset_path,
-        split, # "train" or "val"
+        split,
         device=TORCH_DEVICE,
         preprocess_path=None,
         standard_path=None,
@@ -63,18 +63,16 @@ class SQLDataset(Dataset):
 
         # Determine where to save the dataset following preprocessing
         if preprocess_path is None:
-            # preprocess_path = os.path.join(
-            #     dataset_path, f"pretrain_{split}_preprocess.pkl"
-            # )
-            preprocess_path = f"{dataset_path}/pretrain_{split}_preprocess.pkl"
+            preprocess_path = os.path.join(
+                dataset_path, f"pretrain_{split}_preprocess.pkl"
+            )
 
         # If we've performed preprocessing once, load from saved data
         if os.path.exists(preprocess_path):
             self.load_from_preprocessed(preprocess_path, device)
         else:
             if standard_path is None:
-                # standard_path = os.path.join(dataset_path, f"pretrain_{split}.pkl")
-                standard_path = f"{dataset_path}/pretrain_{split}.pkl"
+                standard_path = os.path.join(dataset_path, f"pretrain_{split}.pkl")
             self.load_from_standard(
                 standard_path, preprocess_path, device
             )
@@ -155,17 +153,17 @@ class SQLDataset(Dataset):
 
         # Process the states of each instruction individually
         max_property_size = self.get_max_property_size(trajectories)
-        for _, static_map, dynamic_maps, _, _, _, _, _, _, _ in trajectories:
+        for _, static_map, dynamic_map, _, _, _, _, _, _, _ in trajectories:
             property_tensors = self.get_property_tensor(
-                static_map, dynamic_maps, max_property_size
+                static_map, dynamic_map, max_property_size
             )
             axial_tensors = axial_converter(property_tensors)
 
-            poses = self.get_poses(dynamic_maps)
+            poses = self.get_poses(dynamic_map)
             rotated_tensors = translator_rotator(axial_tensors, poses)
 
             new_positions = torch.full(
-                (len(dynamic_maps), 2), EDGE_WIDTH + EDGE_WIDTH // 2, device=TORCH_DEVICE
+                (len(dynamic_map), 2), EDGE_WIDTH + EDGE_WIDTH // 2, device=TORCH_DEVICE
             )
             cropped_tensors = tensor_cropper(rotated_tensors[0], new_positions, True)
 

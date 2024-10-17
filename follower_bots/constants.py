@@ -5,7 +5,7 @@
 import torch
 
 from follower_bots.utils import get_gpt2_sep_index
-from cb2game.server.config.config import Config
+from src.cb2game.server.config.config import Config
 
 # Environment values
 EDGE_WIDTH = 25
@@ -45,8 +45,7 @@ ADAM_EPSILON = 1e-8
 MAX_GRAD_NORM = 1.0
 WARMUP_STEPS = 500
 INFERENCE_TEMPERATURE = 1.0
-# N_EPOCH = 150
-N_EPOCH = 2
+N_EPOCH = 150
 BATCH_SIZE = 32
 NUM_WORKERS = 1
 

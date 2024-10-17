@@ -6,11 +6,11 @@ from enum import Enum
 
 import peewee
 
-import cb2game.server.schemas.base as base
-import cb2game.server.schemas.defaults as defaults_db
-from cb2game.server.schemas.event import Event, EventType
-from cb2game.server.schemas.game import Game
-from cb2game.server.schemas.mturk import Assignment
+import src.cb2game.server.schemas.base as base
+import src.cb2game.server.schemas.defaults as defaults_db
+from src.cb2game.server.schemas.event import Event, EventType
+from src.cb2game.server.schemas.game import Game
+from src.cb2game.server.schemas.mturk import Assignment
 
 # This document makes reference to the following game classifications:
 # - Mturk Games (ListMturkGames): Games where at least one player is an mturk worker.
@@ -38,7 +38,6 @@ def ListAnalysisGames(config):
     #   analysis_game_id_ranges: A list of tuples of the form (start_id, end_id).
     #   analytics_since_game_id: The game ID to start the analysis from (discard all games before this).
     games = ListResearchGames()
-    print(f"Number of research games: {len(games)}")
     if len(config.analysis_game_id_ranges) > 0:
         valid_ids = set(
             itertools.chain(
@@ -85,37 +84,40 @@ def IsConfigGame(config, game):
 
 def ListResearchGames():
     games = ListMturkGames()
-    ids = [game.id for game in games]
-    if len(ids) == 0:
-        return []
-    logger.info(f"Max game ID before research filtering: {max(ids)}")
-    return [game for game in games if IsGameResearchData(game)]
+    # ids = [game.id for game in games]
+    # if len(ids) == 0:
+    #     return []
+    # logger.info(f"Max game ID before research filtering: {max(ids)}")
+    # return [game for game in games if IsGameResearchData(game)]
+    return games
 
 def ListMturkGames():
-    games = (
-        Game.select()
-        .join(
-            Assignment,
-            on=(
-                (Game.lead_assignment == Assignment.id)
-                or (Game.follow_assignment == Assignment.id)
-            ),
-            join_type=peewee.JOIN.LEFT_OUTER,
-        )
-        .where(
-            Game.valid == True,
-            Game.type.contains("game-mturk"),
-            (
-                (Game.lead_assignment != None)
-                & (Game.lead_assignment.submit_to_url == "https://www.mturk.com")
-                | (
-                    (Game.follow_assignment != None)
-                    & (Game.lead_assignment.submit_to_url == "https://www.mturk.com")
-                )
-            ),
-        )
-        .switch(Game)
-    )
+    # games = (
+    #     Game.select()
+    #     .join(
+    #         Assignment,
+    #         on=(
+    #             (Game.lead_assignment == Assignment.id)
+    #             or (Game.follow_assignment == Assignment.id)
+    #         ),
+    #         join_type=peewee.JOIN.LEFT_OUTER,
+    #     )
+    #     .where(
+    #         Game.valid == True,
+    #         Game.type.contains("game-mturk"),
+    #         (
+    #             (Game.lead_assignment != None)
+    #             & (Game.lead_assignment.submit_to_url == "https://www.mturk.com")
+    #             | (
+    #                 (Game.follow_assignment != None)
+    #                 & (Game.lead_assignment.submit_to_url == "https://www.mturk.com")
+    #             )
+    #         ),
+    #     )
+    #     .switch(Game)
+    # )
+    games = ListGames()
+    games_id = [game.id for game in games]
     return games
 
 

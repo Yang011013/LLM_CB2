@@ -67,6 +67,5 @@ def get_gpt2_sep_index():
 
 def load_arguments(args_dir):
     # Loads arguments from an existing logging directory.
-    # loaded_args = load_json(os.path.join(args_dir, "args.json"))
-    loaded_args = load_json(f"{args_dir}/args.json")
+    loaded_args = load_json(os.path.join(args_dir, "args.json"))
     return loaded_args

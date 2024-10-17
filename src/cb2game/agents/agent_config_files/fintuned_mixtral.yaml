@@ -1,0 +1,7 @@
+name: "Ollama Models"
+comment: "An agent which describes the game map using text, and then asks fintuned mixtral what to do."
+agent_type: "FINETUNED_MIXTRAL"
+config:
+    model: "DID-Mixtral-7b-Finetuend"
+    queueing_enabled: True
+    max_seq_length: 2048

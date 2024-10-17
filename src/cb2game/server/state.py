@@ -52,7 +52,7 @@ from cb2game.server.state_utils import (
 )
 from cb2game.server.username_word_list import USERNAME_WORDLIST
 from cb2game.server.util import CountDownTimer, JsonSerialize
-
+from cb2game.util.log_config import logger as evel_logger
 logger = logging.getLogger(__name__)
 
 
@@ -250,6 +250,7 @@ class State(object):
         self._feedback_questions = {}
         # Maps from player_id -> list of feedback questions that have not been answered.
         self._unanswered_feedback_question = {}
+        self.agent_selected_cards = []
 
     def game_time(self):
         """Return timedelta between now and when the game started."""
@@ -830,16 +831,25 @@ class State(object):
         stepped_on_card = self._map_provider.card_by_location(actor.location())
         if stepped_on_card is None:
             logger.info("Stepped on card is None.")
+            evel_logger.info("Stepped on card is None.")
             return
-        logger.debug(
-            f"Player {actor.actor_id()} stepped on card {str(stepped_on_card)}."
+        logger.info(
+            f"Player {actor.role()} stepped on card {str(stepped_on_card)}."
         )
+        evel_logger.info(
+            f"Player {actor.role()} stepped on card {str(stepped_on_card)}."
+        )
+
         selected = not stepped_on_card.selected
         self._map_provider.set_selected(stepped_on_card.id, selected)
         self._map_provider.set_color(stepped_on_card.id, color)
         logger.info(
             f"Selected card {stepped_on_card.id} with color: {color}, selected: {selected}"
         )
+        evel_logger.info(
+            f"Selected card {stepped_on_card.id} with color: {color}, selected: {selected}"
+        )
+        self.agent_selected_cards.append((stepped_on_card.id, selected))
         # If cards are covered, then the follower shouldn't be able to get information from the border color (keep it blue).
         card_covers = (
             False

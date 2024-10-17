@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\keyang\Desktop\yan0\Agent\cb2\follower_bots\data_utils\follower_bots\pretraining_data\game_data.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="game_data [2]" uuid="2199f293-a3be-4da5-9238-954cb231c8c4">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\keyang\Desktop\yan0\Agent\cb2\follower_bots\pretraining_data\cb2-data-base\human_human\game_data.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

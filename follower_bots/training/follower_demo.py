@@ -22,10 +22,8 @@ from follower_bots.data_utils.pyclient_utils import (
 )
 from follower_bots.models.model_utils import load_follower_model_for_corpora_eval
 
-from cb2game.pyclient.game_endpoint import Action, Role
-from cb2game.pyclient.remote_client import RemoteClient
-# from py_client.game_endpoint import Action, Role
-# from py_client.remote_client import RemoteClient
+from py_client.game_endpoint import Action, Role
+from py_client.remote_client import RemoteClient
 
 
 def get_args():

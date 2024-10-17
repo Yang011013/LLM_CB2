@@ -1,0 +1,26 @@
+You would be provided with a instrction and an structured string to describe your first-view map.
+Your task is to break down the original instruction into two categories based on the map:
+1. Immediate Tasks: Tasks that are achievable within your current perspective and can be completed promptly. 
+- Type 1: Change Direction (e.g., "Turn left/right/Around") 
+- Type 2: Move to a specific location in the first-view map(e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>"). 
+- Type 3: Interact with a Card at a Specific Location within the visible area of the map.
+2. Deferred Tasks: Tasks that necessitate a change in perspective or additional insights to be accomplished. If there are no deferred tasks, record the output as "NULL".
+
+
+## Note of the Structured String to describe your first-view map:
+    1. A direction of heading greater than 0 means the tile is to your left, less than 0 means the tile is to your right, and equal to 0 means the tile is directly in front of you.
+    2. The distance of NEARBY TILES to your tile is 1, the distance is small when the tile is close to you while the distance is bigger when the tile is far.
+
+
+# Povide your answer by think step by step:
+1、Breaking Down Instructions :
+Review the leader's instructions carefully. Then analyze the structured string representing your first-view map.
+Identify any Immediate Tasks that can be executed based on the current perspective. Then Summarize Remaining Tasks.If there are no such tasks, record the output for this section as "NULL".
+2、Review and Adjust:
+    - Carefully review your immediate and deferred tasks to ensure they faithfully represent the original leader's instructions. 
+    - Check the location: If the there is an specific location in Immediate Tasks, check the direction,  with angle greater than 0 to go to the tile on your left,  angle less than 0 to go right, equal to zero to go to the tile in front of you. \n
+
+Provide your answer in JSON format with the following keys:Immediate Task, Deferred Task. Other formats are not accepted.
+Expected Output Format:
+{"Immediate Task": Either a direction change (e.g., "Turn left/right/Around") or a specific location (e.g., "Next Location: Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>","Card Interaction:   <interaction>  at Tile at heading <angle> and distance <distance>: <GROUND_TILE_TYPE>"),
+"Deferred Task": "NULL" or a consice description of the remaining instructions in no more then 20 words.}

@@ -5,8 +5,6 @@ import logging
 import time
 import json
 from cb2game.server.db_tools import follower_view_description
-
-logger = logging.getLogger(__name__)
 from cb2game.pyclient.follower_data_masking import (
     CensorFollowerMap,
     CensorFollowerProps,
@@ -17,6 +15,30 @@ import re
 from cb2game.server.hex import HecsCoord
 from cb2game.pyclient.client_utils import DescribeMap
 import ast
+import numpy as np
+from PIL import Image
+
+logger = logging.getLogger(__name__)
+def crop_non_white_square(image_path):
+
+    image = Image.open(image_path)
+    image_array = np.array(image)
+    non_white_indices = np.where(np.any(image_array != 255, axis=-1))
+
+    min_x, max_x = np.min(non_white_indices[1]), np.max(non_white_indices[1])
+    min_y, max_y = np.min(non_white_indices[0]), np.max(non_white_indices[0])
+    side_length = max(max_x - min_x, max_y - min_y)
+
+    center_x = (min_x + max_x) // 2
+    center_y = (min_y + max_y) // 2
+    left = max(0, center_x - side_length // 2)
+    upper = max(0, center_y - side_length // 2)
+
+    right = min(image.width, center_x + side_length // 2)
+    lower = min(image.height, center_y + side_length // 2)
+
+    cropped_image = image.crop((left, upper, right, lower))
+    cropped_image.save(image_path)
 
 def extract_card_interaction(task_dict):
     immediate_task_str = task_dict.get("Immediate Task", "")
@@ -28,7 +50,8 @@ def extract_card_interaction(task_dict):
             pass
     return None
 
-def format_checker(response_text):
+
+def format_checker(response_text, map_description):
     formate_error = ["The response should be in json format with the following keys:Immediate Task, Deferred Task.",
                      "The Immediate Task should be one of the following types: Change Direction, Move, Next Location, Card Interaction.",
                      "When the Immediate Task is type of Change Direction, the Change Direction should be one of the following types: Turn Right, Turn Left, Turn Around.",
@@ -39,6 +62,7 @@ def format_checker(response_text):
                      "The Location of a card or tile shouldn't be appeared in Deferred Task",
                      "The Card Interaction must be the format of 'Card Interaction: ['<interaction> at Tile at heading <angle> and distance <distance>: CARD', '<interaction> at Tile at heading <angle> and distance <distance>: CARD', ...]."
                      ]
+
     if "json" in response_text:
         start_index = response_text.find("{")
         end_index = response_text.find("}")
@@ -49,77 +73,55 @@ def format_checker(response_text):
     except:
         return response_text, formate_error[0]
     # check if the response has the correct keys
+    print(response_dict)
     if "Immediate Task" not in response_dict.keys() or "Deferred Task" not in response_dict.keys():
         return "", formate_error[0]
 
     immediate_task = response_dict["Immediate Task"]
-    immediate_task_part1 = immediate_task.split(":")[0].strip()
-    immediate_task_part2 = immediate_task.split(":")[1].strip()
-    # check if the immediate task type is among the 4 types
-    try:
-        immediate_task_part1 in ["Change Direction", "Move", "Next Location", "Card Interaction"]
-    except:
+    task_type, task_detail = map(str.strip, immediate_task.split(":", 1))
+
+    if task_type not in ["Change Direction", "Move", "Next Location", "Card Interaction"]:
         return response_dict, formate_error[1]
 
-    with open("description.txt", "r") as f:
-        map_description = f.read()
-    if immediate_task_part1 == "Change Direction":
-        if immediate_task_part2 not in ["Turn Right", "Turn Left", "Turn Around"]:
-            return response_dict, formate_error[2]
-    elif immediate_task_part1 == "Move":
-        if immediate_task_part2 not in ["Forward", "Backward"]:
-            return response_dict, formate_error[3]
-    # check the card interaction
-    elif immediate_task_part1 == "Card Interaction":
+
+    if task_type == "Change Direction" and task_detail not in ["Turn Right", "Turn Left", "Turn Around"]:
+        return response_dict, formate_error[2]
+    elif task_type == "Move" and task_detail not in ["Forward", "Backward"]:
+        return response_dict, formate_error[3]
+    elif task_type == "Card Interaction":
         card_interactions = extract_card_interaction(response_dict)
         if card_interactions is None:
             return response_dict, formate_error[8]
-        # selected cards location
-        pattern1 = re.compile(r'SELECTED CARDS:\n(.*?)\n\s*UNSELECTED CARDS:', re.DOTALL)
-        match1 = pattern1.search(map_description)
-        # unselected cards location
-        pattern2 = re.compile(r'UNSELECTED CARDS:\n(.*?)\n\s*MAP DESCRIPTION', re.DOTALL)
-        match2 = pattern2.search(map_description)
+
+        selected_cards = re.search(r'SELECTED CARDS:\n(.*?)\n\s*UNSELECTED CARDS:', map_description, re.DOTALL)
+        unselected_cards = re.search(r'UNSELECTED CARDS:\n(.*?)\n\s*MAP DESCRIPTION', map_description, re.DOTALL)
+
         for card_interaction in card_interactions:
             card_location = card_interaction.split("Card at", 1)[1].strip()
-            if "Deselect" in card_interaction:
-                if card_location not in match1.group(1):
-                    return response_dict, formate_error[5]
-            elif "Select" in card_interaction:
-                if card_location not in match2.group(1):
-                    return response_dict, formate_error[6]
-            else:
+            if ("Deselect" in card_interaction and card_location not in selected_cards.group(1)) or \
+                    ("Select" in card_interaction and card_location not in unselected_cards.group(1)):
+                return response_dict, formate_error[5] if "Deselect" in card_interaction else formate_error[6]
+            elif "Deselect" not in card_interaction and "Select" not in card_interaction:
                 return response_dict, "The card interaction should be either Select or Deselect."
-    # check the next_location is in the structured string of first-view map provided
-    else:
-        # when the immediate task is type of next location, check the next_location is in the nearby tiles or further tiles
-        if immediate_task_part1 == "Next Location" and immediate_task_part2 not in \
-                map_description.split("NEARBY TILES")[1]:
-            return response_dict, formate_error[4]
+    elif task_type == "Next Location" and task_detail not in map_description.split("NEARBY TILES")[1]:
+        return response_dict, formate_error[4]
 
-    deferred_task = response_dict["Deferred Task"]
-    # check if the deferred task is in the correct format
-    if "Tile at" in deferred_task or "Next Location" in deferred_task:
+    if any(keyword in response_dict["Deferred Task"] for keyword in ["Tile at", "Next Location"]):
         return response_dict, formate_error[7]
+
     return response_dict, None
 
-
-def get_prompt(instruction, map_update, props, follower, image_data, config):
+def get_prompt(instruction, map_update, props, follower, config):
     follower_map_update = CensorFollowerMap(map_update, follower, config)
-    follower_props = CensorFollowerProps(props, follower, config)
-    follower_props_update = PropUpdate(follower_props)
+    follower_props_update = PropUpdate(CensorFollowerProps(props, follower, config))
     description = DescribeMap(follower_map_update, follower_props_update, follower)
 
-    with open("description.txt", "w") as f:
-        f.write(description)
-    p1 = f"""
-    Here in the instruction you received from the leader: {instruction}
-    the corresponding first-view png image: \n
+    p1 = f"""Here in the instruction you received from the leader: {instruction}
     """
     p2 = f"""Here is the structured string representing your first-view map: \n{description}"""
-    p3 = "Please provide your response:\n"
-    prompt = [p1, image_data, p2, p3]
-    return follower_props_update, prompt
+    p3 = "\nPlease provide your response:"
+    prompt = [p1, p2, p3]
+    return follower_props_update, prompt, description
 
 
 def actions_from_code(action_code, i_uuid: str = None):
@@ -134,41 +136,28 @@ def actions_from_code(action_code, i_uuid: str = None):
     for c in characters_in_prompt:
         # Convert to lower and strip whitespace.
         c = c.lower().strip()
-        if "forward".startswith(c) or "f".startswith(c):
+        if "forward" in c or "f".startswith(c):
             actions.append(Action.Forwards())
-        elif "forward" in c:
-            actions.append(Action.Forwards())
-        elif "backward".startswith(c) or "b".startswith(c):
+        elif "backward" in c or "b".startswith(c):
             actions.append(Action.Backwards())
-        elif "backward" in c:
-            actions.append(Action.Backwards())
-        elif "left".startswith(c) or "l".startswith(c):
+        elif "left" in c or "l".startswith(c):
             actions.append(Action.Left())
-        elif "left" in c:
-            actions.append(Action.Left())
-        elif "right".startswith(c) or "r".startswith(c):
-            actions.append(Action.Right())
-        elif "right" in c:
+        elif "right" in c or "r".startswith(c):
             actions.append(Action.Right())
         elif "around" in c:
             actions.append(Action.Right())
             actions.append(Action.Right())
             actions.append(Action.Right())
-        elif "done".startswith(c) or "d".startswith(c):
+        elif "done" in c or "d".startswith(c):
             actions.append(Action.InstructionDone(i_uuid))
-        elif "done" in c:
-            actions.append(Action.InstructionDone(i_uuid))
-        elif "noop" in c:
-            actions.append(Action.NoopAction())
-        elif len(c) == 0:
+        elif "noop" in c or len(c) == 0:
             actions.append(Action.NoopAction())
         else:
             logger.warning(f"Invalid action code: {c}")
     return actions
 
 
-def find_matching_tiles(data,
-                        keyword):  # keyword-->Next Location: Tile at heading  <angle> and distance <distance>: <TILE_TYPE>
+def find_matching_tiles(data, keyword):
     if "distance 0" in keyword:
         return "done"
     lines = data.split('\n')
@@ -177,7 +166,7 @@ def find_matching_tiles(data,
     for i, line in enumerate(lines):
         if keyword.lower() in line.lower():
             if "You are standing here." in lines[i + 2]:
-                return ""
+                return "done"
             for j in range(i + 2, i + 9):
                 if j < len(lines) and "cannot reach" not in lines[j]:
                     matching_line = lines[j].split(":")[1]
@@ -187,31 +176,28 @@ def find_matching_tiles(data,
 
 
 def deselect_card(mapu, description_atomic, follower, card_location):
-    # 1.卡片在当前位置：forward+backward+forward或者backward+forward+backward
     if "distance 0" in card_location:
-        # 还要考虑follower的朝向
         follower_orientation = follower.heading_degrees() - 60
         atomic_instructions = {0: "forward, backward", 180: "backward, forward", 60: "right, forward, backward",
                                120: "left, backward, forward", -120: "right, backward, forward",
                                -60: "left, forward, backward"}
         degrees_aways = []
-        # 检查周围的tile是否可行
-        # 可行的tile.name: "GROUND_TILE":3, "GROUND_TILE_PATH":28,"MOUNTAIN_TILE":30,"RAMP_TO_MOUNTAIN":31,"SNOWY_MOUNTAIN_TILE":32,"SNOWY_RAMP_TO_MOUNTAIN":36
+        # available tiles' name: "GROUND_TILE":3, "GROUND_TILE_PATH":28,"MOUNTAIN_TILE":30,"RAMP_TO_MOUNTAIN":31,"SNOWY_MOUNTAIN_TILE":32,"SNOWY_RAMP_TO_MOUNTAIN":36
         actionable_tiles_id = [3, 28, 30, 31, 32, 36]
         for neighbors_location in follower.location().neighbors():
             # 检索该tile的名字，并判断是否在可行的tile中
             neighbors_tile_id = mapu.get_tile_id(neighbors_location)
             if neighbors_tile_id not in actionable_tiles_id:
                 continue
-            # 如果当前follower不在mountain类的tile上，那么只能选择GROUND_TILE和GROUND_TILE_PATH、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
+            # if the follower doesn't stand on the mountain tiles, GROUND_TILE和GROUND_TILE_PATH、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN are available.
             if mapu.get_tile_id(follower.location()) in [3, 28]:
                 if neighbors_tile_id not in [3, 28, 31, 36]:
                     continue
-            # 如果当前follower在mountain类的tile上，那么只能选择MOUNTAIN_TILE、SNOWY_MOUNTAIN_TILE、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN
+            # if the follower stand on the mountain tiles, MOUNTAIN_TILE、SNOWY_MOUNTAIN_TILE、RAMP_TO_MOUNTAIN、SNOWY_RAMP_TO_MOUNTAIN are available.
             if mapu.get_tile_id(follower.location()) in [30, 32]:
                 if neighbors_tile_id not in [30, 32, 31, 36]:
                     continue
-            # 如果当前follower在RAMP上，强制选择""forward, backward, forward"或者"backward, forward, backward"
+            # if the follower stand on the RAMP, return ""forward, backward, forward" or "backward, forward, backward" to deselect the card
             if mapu.get_tile_id(follower.location()) in [31, 36]:
                 return "forward, backward"
             degrees_away = follower.location().degrees_to(neighbors_location) - follower_orientation
@@ -229,19 +215,19 @@ def deselect_card(mapu, description_atomic, follower, card_location):
 
 
 def parse_hecs_coord(lines, location):
+    global coord_str
     for i, line in enumerate(lines):
         if location in line:
-            coord_str = lines[i+1].strip()
+            coord_str = lines[i + 1].strip()
             break
-    # 使用正则表达式提取 a, r, c 的值
     pattern = r"HecsCoord\(a=(\d+), r=(\d+), c=(\d+)\)"
     match = re.match(pattern, coord_str)
     if match:
         a, r, c = map(int, match.groups())
-        # 创建并返回 HecsCoord 实例
         return HecsCoord(a=a, r=r, c=c)
     else:
         raise ValueError("Invalid HecsCoord string format")
+
 
 def get_new_orientation(old_orientation, action_string):
     for action in action_string.split(","):
@@ -253,6 +239,7 @@ def get_new_orientation(old_orientation, action_string):
             continue
     return old_orientation % 360
 
+
 def get_card_interaction_actions(description_atomic, response_dict, follower, map, cards):
     cards_interaction = extract_card_interaction(response_dict)
     card_locations = [card_interaction.split("Card at", 1)[1].strip() for card_interaction in cards_interaction]
@@ -261,17 +248,16 @@ def get_card_interaction_actions(description_atomic, response_dict, follower, ma
         action_string = deselect_card(map, description_atomic, follower, card_locations[0])
     elif "Select" in cards_interaction[0]:
         if "distance 0" in card_locations[0]:
-            # 如果follower在卡片上，那么只能选择卡片相当于取消选择卡片
             action_string = deselect_card(map, description_atomic, follower, card_locations[0])
         else:
             action_string = find_matching_tiles(description_atomic, card_locations[0])
     lines = description_atomic.split('\n')
     last_card_coord = parse_hecs_coord(lines, card_locations[0])
     for location in card_locations[1:]:
+        print(location)
         coord = parse_hecs_coord(lines, location)
         follower_new_orientation = get_new_orientation(follower.heading_degrees(), action_string)
         to_next_card = get_instruction_to_location(coord, last_card_coord, follower_new_orientation, map, cards)
-        print("****************to_next_card: ", to_next_card)
         last_card_coord = coord
         action_string += ", " + to_next_card
     return action_string
@@ -280,6 +266,7 @@ def get_card_interaction_actions(description_atomic, response_dict, follower, ma
 def get_action_string(response_dict, mapu, prop_update, follower):
     """
     Args:
+        image_view_path:
         response_dict: response from LLM
         mapu: the map_update of the whole game
         prop_update: the prop_update of follower's view
@@ -291,14 +278,6 @@ def get_action_string(response_dict, mapu, prop_update, follower):
     """
     deferred_task = response_dict["Deferred Task"]
     immediate_task = response_dict["Immediate Task"]
-    # try: # 可能输出不规范
-    #     response_dict = json.loads(response_text)
-    #     response_dict = json.loads(response_text)
-    #     self.deferred_task = response_dict["Deferred Task"]
-    #     immediate_task = response_dict["Immediate Task"]
-    # except KeyError as e:
-
-    # 只要去具体位置才广搜
     description_atomic = ""
     action_string = ""
     if "Card Interaction" in immediate_task or "Next Location" in immediate_task:  # Type1: Change Direction
@@ -307,8 +286,6 @@ def get_action_string(response_dict, mapu, prop_update, follower):
                                                                    follower.heading_degrees())
         end_time = time.time()
         print("Time taken to search map: ", end_time - start_time)
-        with open("description_atomic.txt", "w") as f:
-            f.write(description_atomic)
 
     if "Change Direction" in immediate_task:  # Type1: Change Direction
         action_string = immediate_task.split(":")[1].strip()
@@ -324,7 +301,6 @@ def get_action_string(response_dict, mapu, prop_update, follower):
     if deferred_task == "NULL":
         if action_string.split(",")[-1] != "done":
             action_string += ", done"
-    print("================Action string: ", action_string)
     return action_string
 
 

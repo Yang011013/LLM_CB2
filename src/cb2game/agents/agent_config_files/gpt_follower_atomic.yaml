@@ -1,0 +1,13 @@
+name: "GPT Follower Atomic"
+comment: "An agent which describes the game map using text, and then asks GPT what to do."
+agent_type: "GPT_FOLLOWER_ATOMIC"
+config:
+    temperature: 0.2
+    top_p: 1
+    top_k: 32
+    max_output_tokens: 2048
+    max_in_tokens: 30000
+    model: "gpt-4o-mini"
+    gpt_api_key: "Add your API key here"
+    queueing_enabled: True
+    test_mode: False

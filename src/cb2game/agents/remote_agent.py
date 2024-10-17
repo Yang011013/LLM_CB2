@@ -13,13 +13,13 @@ from cb2game.server.messages.rooms import Role
 
 logger = logging.getLogger(__name__)
 
-
 def PlayRemoteGame(
     host: str,  # "https://cb2.ai"
     agent: Agent,
-    render: bool = False,
+    render: bool = True,
     lobby: str = "bot-sandbox",
     pause_per_turn: float = 0,
+    agent_id: int = 0,
 ):
     # Create client and connect to server.
     client = RemoteClient(host, render, lobby_name=lobby)
@@ -35,8 +35,8 @@ def PlayRemoteGame(
         raise Exception(f"Invalid role: {agent.role()}")
 
     # Wait in the queue for a game to start.
-    game, reason = client.JoinGame( # 返回game_endpoint. game==game_endpoint
-        timeout=timedelta(minutes=1),
+    game, reason = client.JoinGame(
+        timeout=timedelta(minutes=5),
         queue_type=queue_type,
     )
     assert game is not None, f"Unable to join game: {reason}"
@@ -47,20 +47,21 @@ def PlayRemoteGame(
         # Leader's turn first. Wait for follower turn by executing a noop.
         action = Action.NoopAction()
         game_state = game.step(action)
+
     while not game.over():
         if pause_per_turn > 0:
             time.sleep(pause_per_turn)
-        action = agent.choose_action(game_state)
-        logger.info(f"step({action})")
+
+        _, action = agent.choose_action(game_state, game, test=False)
         game_state = game.step(action)
-
-
+        
 def main(
     host,
-    agent_config_filepath: str,
-    render=False,
+    agent_config_filepath: str,  
+    render=True,
     lobby="bot-sandbox",
     pause_per_turn=0,
+    agent_id=0,
 ):
     """Connects to a remote server from the command line and plays a game using the specified agent."""
     # Loads an agent based off of pyyaml configs.
@@ -72,8 +73,8 @@ def main(
         render,
         lobby,
         pause_per_turn,
+        agent_id,
     )
-
 
 if __name__ == "__main__":
     fire.Fire(main)

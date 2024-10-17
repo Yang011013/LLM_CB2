@@ -30,11 +30,11 @@ import sys
 
 import fire
 import peewee
-from schemas import base
-from schemas.cards import Card, CardSelections, CardSets
-from schemas.game import Game, Instruction, LiveFeedback, Move, Turn
-from schemas.map import MapUpdate
-from schemas.mturk import Assignment, Worker
+from cb2game.server.schemas import base
+from cb2game.server.schemas.cards import Card, CardSelections, CardSets
+from cb2game.server.schemas.game import Game, Instruction, LiveFeedback, Move, Turn
+from cb2game.server.schemas.map import MapUpdate
+from cb2game.server.schemas.mturk import Assignment, Worker
 
 logger = logging.getLogger(__name__)
 

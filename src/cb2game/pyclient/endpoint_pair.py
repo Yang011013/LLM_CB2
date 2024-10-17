@@ -98,5 +98,6 @@ class EndpointPair:
         else:
             raise Exception(f"Invalid turn state {self.turn}.")
         if self.turn == Role.LEADER:
-            return leader_result
-        return follower_result
+            return leader_result,follower_result
+        # return follower_result
+        return leader_result,follower_result

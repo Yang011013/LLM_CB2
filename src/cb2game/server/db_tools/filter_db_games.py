@@ -7,6 +7,7 @@ import fire
 
 from cb2game.server.schemas import base
 from cb2game.server.schemas.game import Game
+from cb2game.server.schemas.event import Event
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +26,12 @@ def DeleteEvents(game):
 
     The foreign keys are in the event.parent_event field.
     """
-    for event in game.events:
+    events = Event.select().where(Event.game_id == game.id)
+    for event in events:
         event.parent_event = None
         event.save()
 
-    for event in game.events:
+    for event in events:
         event.delete_instance()
 
 
@@ -37,6 +39,7 @@ def DeleteGame(game):
     """Delete a game and all of its events."""
     DeleteEvents(game)
     game.delete_instance()
+
 
 
 def main(db_path, good_game_ids_path):
@@ -93,7 +96,6 @@ def main(db_path, good_game_ids_path):
         print(f"Deleting games...")
         for game in games_to_delete:
             DeleteGame(game)
-
 
 if __name__ == "__main__":
     fire.Fire(main)

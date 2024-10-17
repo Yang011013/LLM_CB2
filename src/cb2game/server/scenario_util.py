@@ -35,6 +35,50 @@ def TurnDuration(role):
     )
 
 
+def GetSelectedCardsBetweenEvents(start_event, end_event):
+    # Get all events happened before end_event and after start_event
+    game_events = (
+        Event.select()
+        .where((Event.game == start_event.game) & (Event.server_time <= end_event.server_time) & (Event.server_time >= start_event.server_time))
+        .order_by(Event.server_time)
+    )
+    card_events = game_events.where(
+        Event.type
+        << [
+            EventType.CARD_SET,
+            EventType.CARD_SPAWN,
+            EventType.CARD_SELECT,
+            EventType.PROP_UPDATE,
+        ]
+    ).order_by(Event.server_time)
+    # Integrate all prop, cardset and card spawn events up to the given event, to get the current card state
+    cards = []
+    cards_by_loc = {}
+    card_selected_by_leader = {}
+    card_selected_by_follower = {}
+    for event in card_events:
+        if event.type == EventType.CARD_SET:
+            continue
+        if event.type == EventType.CARD_SPAWN:
+            continue
+        if event.type == EventType.CARD_SELECT:
+            card = Card.from_json(event.data)
+            cards_by_loc[card.location] = card
+            if event.role == 'Role.LEADER':
+                card_selected_by_leader[card.location] = card
+            if event.role == 'Role.FOLLOWER':
+                card_selected_by_follower[card.location] = card
+        elif event.type == EventType.PROP_UPDATE:
+            continue
+
+    cards = cards_by_loc.values()
+    cards = [card for card in cards if card is not None]
+    card_selected_by_leader = card_selected_by_leader.values()
+    card_selected_by_leader = [card for card in card_selected_by_leader if card is not None]
+    card_selected_by_follower = card_selected_by_follower.values()
+    card_selected_by_follower = [card for card in card_selected_by_follower if card is not None]
+    return cards, card_selected_by_leader, card_selected_by_follower
+
 def ReconstructScenarioFromEvent(event_uuid: str) -> Scenario:
     """Looks up a given event in the database.
 
@@ -78,8 +122,11 @@ def ReconstructScenarioFromEvent(event_uuid: str) -> Scenario:
     # Integrate all prop, cardset and card spawn events up to the given event, to get the current card state
     cards = []
     cards_by_loc = {}
+    last_event_is_set = False
+    all_selected_card_ids = []
     for event in card_events:
         if event.type == EventType.CARD_SET:
+            last_event_is_set = True
             data = orjson.loads(event.data)
             set_cards = [Card.from_dict(card) for card in data["cards"]]
             # Clear cards that were in the set
@@ -90,6 +137,10 @@ def ReconstructScenarioFromEvent(event_uuid: str) -> Scenario:
             card = Card.from_dict(data)
             cards_by_loc[card.location] = card
         if event.type == EventType.CARD_SELECT:
+            all_selected_card_ids.append(Card.from_json(event.data).id)
+            if last_event_is_set:
+                last_event_is_set = False
+                continue
             card = Card.from_json(event.data)
             cards_by_loc[card.location] = card
         elif event.type == EventType.PROP_UPDATE:

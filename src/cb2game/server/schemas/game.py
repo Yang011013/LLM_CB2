@@ -13,6 +13,7 @@ from cb2game.server.schemas.util import HecsCoordField
 
 
 class Game(BaseModel):
+
     id = AutoField()
     # type is: [<lobby-name>|<lobby-type>|]<game-type>. game-type:'game', 'lead_tutorial', or 'follow_tutorial'.
     type = TextField(null=True)
@@ -38,6 +39,7 @@ class Game(BaseModel):
     follow_remote = ForeignKeyField(Remote, backref="follower_games", null=True)
     server_software_commit = TextField(null=False, default="")
     kvals = TextField(null=True)  # JSON of key-value pairs.
+    server_id = None
 
 
 # Most of the rest of this file isn't used in the database anymore, and is just

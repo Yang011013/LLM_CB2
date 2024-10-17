@@ -1,0 +1,28 @@
+name: "Gemini Vision Follower Atomic"
+comment: "An agent which describes the game map using text, and then asks Gemini what to do."
+agent_type: "GEMINI_VISION_FOLLOWER_ATOMIC"
+config:
+    temperature: 0.2
+    top_p: 1
+    top_k: 32
+    model: "gemini-1.5-flash-latest"
+    gemini_api_key: "Add your API key here"
+    queueing_enabled: True
+    safety_settings: [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+        ]

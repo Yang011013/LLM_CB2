@@ -41,7 +41,7 @@ def VisibleCoordinates(follower_actor, config):
         if coord in visible_coords:
             continue
         if (coord != follower_actor.location()) and (
-            not CoordinateInViewingDistance(coord, follower_actor, config.fog_end)
+            not CoordinateInViewingDistance(coord, follower_actor, 20)
             or not CoordinateInFov(coord, follower_actor, config)
         ):
             continue
@@ -128,7 +128,7 @@ def CensorFollowerMap(map_update, follower_actor, config: Config):
         follower_actor: The follower actor. Used to find the actor's location & heading.
         config: The game configuration. Used to determine follower visibility.
     """
-    config.fog_end / UNITY_COORDINATES_SCALE
+    # config.fog_end / UNITY_COORDINATES_SCALE
     # There's something wrong with orientation... I have to put - 60 everywhere
     # Actor.heading_degrees() (actor.py) is used.
     follower_actor.heading_degrees() - 60
@@ -162,7 +162,8 @@ def CensorFollowerProps(props, follower_actor, config):
     """
     new_props = []
     for prop in props:
-        if CoordinateIsVisible(prop.prop_info.location, follower_actor, config.fog_end):
+        # if CoordinateIsVisible(prop.prop_info.location, follower_actor, config.fog_end):
+        if CoordinateIsVisible(prop.prop_info.location, follower_actor, 20):
             new_props.append(dataclasses.replace(prop))
     return new_props
 
@@ -180,7 +181,7 @@ def CensorActors(actors, follower_actor, config):
     """
     new_actors = []
     for actor in actors:
-        if CoordinateIsVisible(actor.location(), follower_actor, config.fog_end):
+        if CoordinateIsVisible(actor.location(), follower_actor, 20):
             new_actors.append(
                 Actor(
                     actor.actor_id(),

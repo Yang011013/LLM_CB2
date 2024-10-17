@@ -1,0 +1,7 @@
+name: "Baseline Follower"
+comment: "The decision transformer model provided by the cb2 repository."
+agent_type: "BASELINE_FOLLOWER"
+config:
+    experiments_folder: "follower_bots/experiments/pretraining/deployment_models"
+    experiments_name: "run_3"
+    use_ensembling: False
