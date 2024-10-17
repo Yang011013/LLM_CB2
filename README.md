@@ -55,9 +55,9 @@ We study the problem of constructing an efficient LLM-based instruction-followin
 ```sh
 # Recommand to use annoconda
 conda create -n llm_cb2 python=3.9
-conda activate consistent4d
+conda activate llm_cb2
 # Clone the repo
-git clone https://github.com/yanqinJiang/Consistent4D
+git clone https://github.com/Yang011013/LLM_CB2.git
 cd llm_cb2
 
 # Build the environment
