@@ -92,7 +92,7 @@ To play the CB2 game with an LLM, follow these steps:
      To run with Gemini or GPT:
 
      ```sh
-     python -m cb2game.agents.remote_vision_agent --host "http://localhost:8080" --agent_config_filepath <path_to_yaml_file>
+     python -m cb2game.agents.remote_agent --host "http://localhost:8080" --agent_config_filepath <path_to_yaml_file>
      ```
 
    - **Finetuned Mixtral:**
@@ -102,7 +102,7 @@ To play the CB2 game with an LLM, follow these steps:
      To run with Mixtral:
 
      ```sh
-     python -m cb2game.agents.remote_vision_agent --host "http://localhost:8080" --agent_config_filepath src/cb2game/agents/agent_config_files/fintuned_mixtral.yaml
+     python -m cb2game.agents.remote_agent --host "http://localhost:8080" --agent_config_filepath src/cb2game/agents/agent_config_files/fintuned_mixtral.yaml
      ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
