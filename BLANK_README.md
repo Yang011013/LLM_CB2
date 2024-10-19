@@ -1,39 +1,12 @@
 <a id="readme-top"></a>
 
-<!-- TABLE OF CONTENTS -->
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
-
-<!-- ABOUT THE PROJECT -->
 # Synergizing LLMS: From Closed-Source Prototyping to Open-Source Model Enhancement in Instruction Following
 
 **This Repository is modified based on [cb2](https://github.com/lil-lab/cb2).**
 
 <video width="640" height="360" controls>
-  <source src="ab473981fb151765736fcb48dfdbaa30_raw.mp4" type="video/mp4">
+  <source src="assets/demo.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
@@ -55,9 +28,9 @@ We study the problem of constructing an efficient LLM-based instruction-followin
 ```sh
 # Recommand to use annoconda
 conda create -n llm_cb2 python=3.9
-conda activate llm_cb2
+conda activate consistent4d
 # Clone the repo
-git clone https://github.com/Yang011013/LLM_CB2.git
+git clone https://github.com/yanqinJiang/Consistent4D
 cd llm_cb2
 
 # Build the environment
@@ -115,7 +88,6 @@ Our code is based on [cb2](https://github.com/lil-lab/cb2). We thank the authors
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
 
 # Citation
 
